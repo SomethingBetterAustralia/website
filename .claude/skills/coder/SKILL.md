@@ -34,6 +34,20 @@ Read prior `## Plan` / `## Design` from `context:` before coding. If `cycle > 1`
 - Recreate backend types on the frontend; import them.
 - Hardcode ports.
 
+## Frontend conventions
+
+`packages/frontend` uses Tailwind v4 + a shadcn-style component pattern. See `.claude/architecture/FRONTEND_STACK.md`.
+
+- **Write mobile-first.** Unprefixed utilities target mobile; layer larger viewports with explicit breakpoint prefixes (`min-[880px]:`, `sm:`, `md:`). Never use `max-*` variants to hide content on small screens.
+- Style with **Tailwind utility classes**. Do not create new `.css` files. The only stylesheet is `src/index.css`.
+- Use `cn` from `@/lib/utils` for conditional / merged classes. Use `cva` from `class-variance-authority` for variant components.
+- Reusable UI lives under `src/components/ui/`. Follow the seed `Button` (`@/components/ui/button`): `cva` variants, `cn`, `forwardRef`, `Slot` for `asChild`.
+- Icons → `import { Icon } from 'lucide-react'`.
+- Animation → `import { motion } from 'motion/react'`.
+- Use the `@/*` path alias for `src/*` imports; keep `@backend/*` for backend types.
+- Do not retype backend types — import from `@backend/*`.
+- If a brand or semantic token is missing, extend `src/index.css` `@theme` rather than adding inline color literals.
+
 ## Report
 
 1. Files created / modified / deleted (counts + folder summary)

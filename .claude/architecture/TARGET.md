@@ -22,9 +22,10 @@ The current `packages/*/src/` directories are flat. The target layout below appl
 
 **Frontend:**
 - `src/pages/` — route-level components
-- `src/components/` — reusable UI
+- `src/components/` — reusable UI (shadcn-pattern primitives under `src/components/ui/`)
 - `src/hooks/` — React hooks
 - `src/lib/` — non-React utilities and API client
+- See `.claude/architecture/FRONTEND_STACK.md` for the frontend stack and conventions.
 
 ## Stage of life
 

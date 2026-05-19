@@ -43,6 +43,19 @@ State explicitly where each piece lives:
 
 If logic ends up in a route, fix it in design — don't let it slip to coding.
 
+## Frontend stack (when designing UI)
+
+`packages/frontend` uses Tailwind v4 + a shadcn-style component pattern. See `.claude/architecture/FRONTEND_STACK.md` for the full list.
+
+When designing frontend changes:
+
+- **Design mobile-first.** Specify the mobile layout/type/spacing as the base; describe larger-viewport overrides with explicit breakpoint prefixes (`min-[880px]:`, `sm:`, `md:`). Do not specify desktop-only states that hide content on mobile via `max-*` rules.
+- Style with **Tailwind utility classes**. No new bespoke `.css` files. Brand colors are available as `bg-sb-navy`, `text-sb-accent`, etc.; semantic tokens are `bg-primary`, `text-foreground`, etc.
+- Reusable UI goes under `src/components/ui/` and follows the shadcn pattern (`cva` variants, `cn` for class composition, `Slot` for `asChild`, `forwardRef`).
+- Icons → `lucide-react`. Animations → `motion/react`. Accessible primitives → `@radix-ui/*` (via shadcn-style wrappers under `src/components/ui/`).
+- Import from `@/lib/utils`, `@/components/ui/*` using the `@` alias.
+- Do not redefine brand or semantic tokens locally — extend `src/index.css` `@theme` if a token is genuinely missing.
+
 ## No backwards compatibility
 
 When a contract changes, the design must update all call sites. Do not introduce a parallel old-and-new path. If the call-site count is large, that's a real cost to surface in the design, not a reason to add a shim.
