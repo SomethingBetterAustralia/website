@@ -99,23 +99,30 @@ export function Header() {
           >
             <nav
               aria-label="Mobile"
-              className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4"
+              className="mx-auto flex max-w-7xl flex-col items-center gap-1 px-5 py-4"
             >
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    'rounded-md px-3 py-3 font-display text-xl font-bold tracking-[-0.02em] text-sb-accent transition-colors hover:bg-sb-cream-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                    'group relative rounded-md px-3 py-3 font-display text-xl font-bold tracking-[-0.02em] text-sb-accent transition-colors hover:bg-sb-cream-warm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
                     route === item.path && 'italic text-sb-accent-hot'
                   )}
                 >
                   {item.label}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'pointer-events-none absolute inset-x-3 -bottom-[2px] h-[2px] origin-left scale-x-0 rounded-full bg-sb-accent transition-transform duration-200 group-hover:scale-x-100',
+                      route === item.path && 'scale-x-100'
+                    )}
+                  />
                 </Link>
               ))}
               <Button
                 asChild
-                className="mt-3 self-start rounded-full bg-sb-accent text-sb-white hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
+                className="mt-3 self-center rounded-full bg-sb-accent text-sb-white hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
               >
                 <Link to="/donate">Donate</Link>
               </Button>

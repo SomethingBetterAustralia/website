@@ -7,7 +7,7 @@ export function Footer() {
       />
       <a
         href="mailto:hi@somethingbetteraustralia.com"
-        className="inline-block cursor-pointer rounded-full bg-sb-accent px-12 py-[1.6em] font-display text-base font-medium leading-none tracking-[0.04em] text-sb-white capitalize no-underline transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-sb-accent-hot hover:text-sb-white"
+        className="inline-block max-w-full cursor-pointer rounded-full bg-sb-accent px-6 py-[1.4em] font-display text-sm font-medium leading-none tracking-[0.04em] text-sb-white capitalize no-underline transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-sb-accent-hot hover:text-sb-white min-[880px]:px-12 min-[880px]:py-[1.6em] min-[880px]:text-base"
       >
         hi@somethingbetteraustralia.com
       </a>
