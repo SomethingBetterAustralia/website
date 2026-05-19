@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Something Better Australia — website",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "dev:backend": "npm run dev --workspace @somethingbetter/backend",
@@ -12,6 +14,7 @@
     "type-check": "npm run type-check --workspaces --if-present"
   },
   "devDependencies": {
+    "pngjs": "^7.0.0",
     "typescript": "^5.5.0"
   },
   "engines": {
