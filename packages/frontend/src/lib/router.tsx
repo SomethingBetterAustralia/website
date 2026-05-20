@@ -4,18 +4,24 @@ export type Route =
   | '/'
   | '/people'
   | '/policies'
+  | '/progress'
+  | '/financials'
   | '/karen'
   | '/bacon-board'
   | '/moonshot'
+  | '/recognition'
   | '/donate';
 
 export const ROUTES: readonly Route[] = [
   '/',
   '/people',
   '/policies',
+  '/progress',
+  '/financials',
   '/karen',
   '/bacon-board',
   '/moonshot',
+  '/recognition',
   '/donate',
 ];
 
@@ -27,9 +33,12 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/people', label: 'People' },
   { path: '/policies', label: 'Policies' },
+  { path: '/progress', label: 'Progress' },
+  { path: '/financials', label: 'Financials' },
   { path: '/karen', label: 'Karen' },
   { path: '/bacon-board', label: 'Bacon Board' },
   { path: '/moonshot', label: 'Moonshot' },
+  { path: '/recognition', label: 'Recognition' },
 ];
 
 function isRoute(path: string): path is Route {
