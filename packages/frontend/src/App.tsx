@@ -4,11 +4,12 @@ import { Donate } from '@/pages/Donate';
 import { Financials } from '@/pages/Financials';
 import { Home } from '@/pages/Home';
 import { Karen } from '@/pages/Karen';
-import { Moonshot } from '@/pages/Moonshot';
+import { Open } from '@/pages/Open';
 import { People } from '@/pages/People';
 import { Policies } from '@/pages/Policies';
 import { Progress } from '@/pages/Progress';
 import { Recognition } from '@/pages/Recognition';
+import { Survey } from '@/pages/Survey';
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { RouterProvider, useRoute, type Route } from '@/lib/router';
 
@@ -20,8 +21,9 @@ const PAGES: Record<Route, ReactElement> = {
   '/financials': <Financials />,
   '/karen': <Karen />,
   '/bacon-board': <BaconBoard />,
-  '/moonshot': <Moonshot />,
+  '/open': <Open />,
   '/recognition': <Recognition />,
+  '/survey': <Survey />,
   '/donate': <Donate />,
 };
 

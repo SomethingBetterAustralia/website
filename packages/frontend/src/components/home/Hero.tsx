@@ -6,7 +6,7 @@ const HEADLINE_WORDS = ['Something', 'Better', 'Australia'] as const;
 export function Hero() {
   const reduce = useReducedMotion();
   return (
-    <section className="relative overflow-hidden px-6 pb-16 pt-16 min-[880px]:px-12 min-[880px]:pb-24 min-[880px]:pt-24">
+    <section className="relative overflow-hidden px-6 pb-16 pt-8 min-[880px]:px-12 min-[880px]:pb-24 min-[880px]:pt-12">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-32 -top-32 size-[28rem] rounded-full bg-sb-accent/10 blur-3xl"

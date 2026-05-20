@@ -86,12 +86,12 @@ const TESTIMONIES: readonly Testimony[] = [
 export function Recognition() {
   const reduce = useReducedMotion();
   return (
-    <div className="flex flex-col gap-16 px-6 pb-24 pt-12 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-20">
+    <div className="flex flex-col gap-16 px-6 pb-24 pt-6 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-10">
       <motion.header
         initial={reduce ? false : 'hidden'}
         animate="visible"
         variants={staggerContainer}
-        className="mx-auto flex w-full max-w-5xl flex-col items-start gap-4"
+        className="mx-auto flex w-full max-w-5xl flex-col items-start gap-5"
       >
         <motion.span
           variants={revealUp}
@@ -106,9 +106,17 @@ export function Recognition() {
         >
           Coverage, commentary, and voices.
         </motion.h1>
+        <motion.blockquote
+          variants={revealUp}
+          className="flex w-full gap-4 border-l-4 border-sb-accent pl-4"
+        >
+          <p className="font-display text-[clamp(1.6rem,3.5vw,2.4rem)] font-medium italic leading-[1.15] tracking-[-0.03em] text-sb-navy">
+            &ldquo;<span className="text-sb-accent-hot">People are starting</span> to find us.&rdquo;
+          </p>
+        </motion.blockquote>
         <motion.p
           variants={revealUp}
-          className="max-w-[52ch] text-[1.05rem] leading-[1.6] text-sb-text"
+          className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-text"
         >
           What the press is saying about Charlotte Mortlock and Something Better Australia, plus
           the supporters and stories that are starting to find us.

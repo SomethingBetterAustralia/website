@@ -1,5 +1,437 @@
-import { PagePlaceholder } from '@/components/PagePlaceholder';
+import { AlertTriangle, ClipboardList, RotateCw, Users, X } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import * as React from 'react';
+import type { DomainScore, MemberProfile, PeopleResponse } from '@backend/types/people';
+import type { SurveyDefinitionResponse, SurveyDomain } from '@backend/types/survey';
+import { Button } from '@/components/ui/button';
+import {
+  DomainSpectra,
+  LeaningsScatter,
+  expertiseToOpacity,
+  type ScatterPoint,
+} from '@/components/people';
+import { usePeoplePage, type PeoplePageState } from '@/hooks/usePeoplePage';
+import { Link } from '@/lib/router';
+import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
+import { cn } from '@/lib/utils';
+
+type ToggleKey = 'leadership' | 'members' | 'all';
+type Members = PeopleResponse['members'];
+type Domains = SurveyDefinitionResponse['definition']['domains'];
+
+function meanExpertise(member: MemberProfile): 1 | 2 | 3 | 4 | 5 {
+  if (member.domainScores.length === 0) return 1;
+  const sum = member.domainScores.reduce((acc, ds) => acc + ds.expertise, 0);
+  const mean = sum / member.domainScores.length;
+  return Math.max(1, Math.min(5, Math.round(mean))) as 1 | 2 | 3 | 4 | 5;
+}
+
+function memberToPoint(member: MemberProfile): ScatterPoint {
+  return {
+    id: member.id,
+    label: member.name,
+    sublabel: member.role,
+    economicAxis: member.economicAxis,
+    socialAxis: member.socialAxis,
+    opacity: expertiseToOpacity(meanExpertise(member)),
+  };
+}
+
+function domainScoreToPoint(
+  ds: DomainScore,
+  domain: SurveyDomain | undefined,
+): ScatterPoint | null {
+  if (ds.economicComponent === null && ds.socialComponent === null) return null;
+  return {
+    id: ds.domainId,
+    label: domain?.name ?? ds.domainId,
+    sublabel: `Expertise: ${ds.expertise}/5 · Score: ${Math.round(ds.score)}`,
+    economicAxis: ds.economicComponent ?? 0,
+    socialAxis: ds.socialComponent ?? 0,
+    opacity: expertiseToOpacity(ds.expertise),
+  };
+}
 
 export function People() {
-  return <PagePlaceholder title="People" />;
+  const reduce = useReducedMotion() ?? false;
+  const [state, retry] = usePeoplePage();
+  return (
+    <div className="flex flex-col gap-16 px-6 pb-24 pt-6 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-10">
+      <PeopleBand state={state} retry={retry} reduce={reduce} />
+      <SurveyCta reduce={reduce} />
+      <Methodology reduce={reduce} />
+    </div>
+  );
+}
+
+function PeopleHeader({ reduce }: { reduce: boolean }) {
+  return (
+    <motion.header
+      initial={reduce ? false : 'hidden'}
+      animate="visible"
+      variants={staggerContainer}
+      className="flex w-full flex-col items-start gap-5"
+    >
+      <motion.span
+        variants={revealUp}
+        className="inline-flex items-center gap-2 text-sb-accent-hot"
+      >
+        <Users aria-hidden className="size-4" />
+        <span className="text-xs font-semibold uppercase tracking-[0.22em]">People</span>
+      </motion.span>
+      <motion.h1
+        variants={revealUp}
+        className="font-display text-[clamp(2.8rem,6.5vw,4.6rem)] font-medium italic leading-[1.02] tracking-[-0.05em] text-sb-accent"
+      >
+        A team with range, not a tribe.
+      </motion.h1>
+      <motion.blockquote
+        variants={revealUp}
+        className="flex w-full gap-4 border-l-4 border-sb-accent pl-4"
+      >
+        <p className="font-display text-[clamp(1.6rem,3.5vw,2.4rem)] font-medium italic leading-[1.15] tracking-[-0.03em] text-sb-navy">
+          &ldquo;We wouldn&rsquo;t agree on everything.{' '}
+          <span className="text-sb-accent-hot">That is exactly the point.</span>&rdquo;
+        </p>
+      </motion.blockquote>
+      <motion.p
+        variants={revealUp}
+        className="max-w-[60ch] text-[1.05rem] leading-[1.6] text-sb-text"
+      >
+        Something Better Australia is built by people who would not agree on everything if you sat
+        them around a kitchen table — and that is exactly the point. Below is where each of us sits
+        across the major policy domains. Click anyone to see the detail.
+      </motion.p>
+    </motion.header>
+  );
+}
+
+function PeopleBand({
+  state,
+  retry,
+  reduce,
+}: {
+  state: PeoplePageState;
+  retry: () => void;
+  reduce: boolean;
+}) {
+  if (state.kind === 'loading') {
+    return (
+      <section className="mx-auto w-full max-w-5xl">
+        <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+          <PeopleHeader reduce={reduce} />
+          <LoadingCard reduce={reduce} />
+        </div>
+      </section>
+    );
+  }
+  if (state.kind === 'error') {
+    return (
+      <section className="mx-auto w-full max-w-5xl">
+        <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+          <PeopleHeader reduce={reduce} />
+          <ErrorCard message={state.message} onRetry={retry} />
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="mx-auto w-full max-w-5xl">
+      <Visualisation members={state.members} domains={state.domains} reduce={reduce} />
+    </section>
+  );
+}
+
+function LoadingCard({ reduce }: { reduce: boolean }) {
+  return (
+    <motion.div
+      animate={reduce ? undefined : { opacity: [0.5, 1, 0.5] }}
+      transition={reduce ? undefined : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+      className={cn(
+        'flex min-h-[24rem] flex-col items-center justify-center gap-3 rounded-3xl bg-sb-white p-8 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm',
+        reduce && 'opacity-70',
+      )}
+    >
+      <Users aria-hidden className="size-6 text-sb-accent-hot" />
+      <p className="text-sm text-sb-text-muted">Loading the team…</p>
+    </motion.div>
+  );
+}
+
+function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex min-h-[24rem] flex-col items-center justify-center gap-4 rounded-3xl bg-sb-white p-8 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-error/30">
+      <AlertTriangle aria-hidden className="size-6 text-sb-error" />
+      <p className="max-w-[40ch] text-center text-sm text-sb-text">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 rounded-full bg-sb-cream-warm px-4 py-1.5 text-sm font-medium text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+      >
+        <RotateCw aria-hidden className="size-4" />
+        Try again
+      </button>
+    </div>
+  );
+}
+
+function Visualisation({
+  members,
+  domains,
+  reduce,
+}: {
+  members: Members;
+  domains: Domains;
+  reduce: boolean;
+}) {
+  const [toggle, setToggle] = React.useState<ToggleKey>('leadership');
+  const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
+  const detailRef = React.useRef<HTMLDivElement | null>(null);
+
+  const counts = React.useMemo(() => {
+    const leadership = members.filter((m) => m.isLeadership).length;
+    return {
+      leadership,
+      members: members.length - leadership,
+      all: members.length,
+    };
+  }, [members]);
+
+  const filtered = React.useMemo(() => {
+    if (toggle === 'leadership') return members.filter((m) => m.isLeadership);
+    if (toggle === 'members') return members.filter((m) => !m.isLeadership);
+    return members;
+  }, [toggle, members]);
+
+  const selectedMember = React.useMemo(
+    () => (selectedId ? members.find((m) => m.id === selectedId) : undefined),
+    [selectedId, members],
+  );
+
+  const domainMode = Boolean(selectedMember);
+  const points = React.useMemo<ScatterPoint[]>(() => {
+    if (selectedMember) {
+      const byId = new Map(domains.map((d) => [d.id, d]));
+      const out: ScatterPoint[] = [];
+      for (const ds of selectedMember.domainScores) {
+        const p = domainScoreToPoint(ds, byId.get(ds.domainId));
+        if (p) out.push(p);
+      }
+      return out;
+    }
+    return filtered.map(memberToPoint);
+  }, [selectedMember, domains, filtered]);
+
+  function handleSelectMember(id: string) {
+    setSelectedId(id);
+    requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({
+        behavior: reduce ? 'auto' : 'smooth',
+        block: 'start',
+      });
+    });
+  }
+
+  function handleToggleChange(next: ToggleKey) {
+    setToggle(next);
+    setSelectedId(undefined);
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+        <PeopleHeader reduce={reduce} />
+        <div className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:p-8">
+          <Toggle current={toggle} counts={counts} onChange={handleToggleChange} reduce={reduce} />
+          <div className="mt-6">
+            <LeaningsScatter
+              points={points}
+              selectedPointId={domainMode ? undefined : selectedId}
+              onSelectPoint={domainMode ? undefined : handleSelectMember}
+            />
+          </div>
+          {selectedMember ? (
+            <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
+              Each dot is one policy domain for{' '}
+              <span className="font-medium text-sb-navy">{selectedMember.name}</span>. The spread
+              across quadrants shows that a single person doesn&rsquo;t fit one party — they lean
+              one way on some issues, another on others.
+            </p>
+          ) : (
+            <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
+              Up–down is social and cultural orientation; left–right is economic. Dot opacity
+              reflects how expert that person rates themselves across the domains they answered.
+            </p>
+          )}
+        </div>
+      </div>
+      <div ref={detailRef} className="mt-8 min-[880px]:mt-10">
+        <AnimatePresence initial={false}>
+          {selectedMember && (
+            <motion.section
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="overflow-hidden"
+            >
+              <MemberDetail
+                member={selectedMember}
+                domains={domains}
+                onClear={() => setSelectedId(undefined)}
+              />
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
+  );
+}
+
+function Toggle({
+  current,
+  counts,
+  onChange,
+  reduce,
+}: {
+  current: ToggleKey;
+  counts: { leadership: number; members: number; all: number };
+  onChange: (next: ToggleKey) => void;
+  reduce: boolean;
+}) {
+  const items: ReadonlyArray<{ key: ToggleKey; label: string; count: number }> = [
+    { key: 'leadership', label: 'Leadership', count: counts.leadership },
+    { key: 'members', label: 'Members', count: counts.members },
+    { key: 'all', label: 'All', count: counts.all },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Member filter"
+      className="inline-flex items-center gap-1 rounded-full bg-sb-cream-warm p-1"
+    >
+      {items.map((item) => {
+        const active = current === item.key;
+        return (
+          <motion.button
+            key={item.key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(item.key)}
+            whileTap={reduce ? undefined : { scale: 0.97 }}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors min-[880px]:px-4 min-[880px]:py-2',
+              active ? 'bg-sb-navy text-sb-cream' : 'text-sb-text-muted hover:bg-sb-cream',
+            )}
+          >
+            <span>{item.label}</span>
+            <span className="text-xs opacity-70">· {item.count}</span>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MemberDetail({
+  member,
+  domains,
+  onClear,
+}: {
+  member: MemberProfile;
+  domains: Domains;
+  onClear: () => void;
+}) {
+  return (
+    <div className="rounded-3xl bg-sb-cream-warm/40 p-6 ring-1 ring-sb-cream-warm min-[880px]:p-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl font-medium leading-tight tracking-tight text-sb-navy min-[880px]:text-3xl">
+            {member.name}
+          </h2>
+          <p className="mt-1 text-sm text-sb-text-muted">
+            {member.role} · {member.background}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label="Clear selection"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs text-sb-text-muted transition-colors hover:bg-sb-cream hover:text-sb-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+        >
+          <X aria-hidden className="size-3.5" />
+          Clear
+        </button>
+      </div>
+      <div className="mt-6">
+        <DomainSpectra member={member} domains={domains} />
+      </div>
+    </div>
+  );
+}
+
+function SurveyCta({ reduce }: { reduce: boolean }) {
+  return (
+    <section className="mx-auto w-full max-w-5xl">
+      <motion.div
+        initial={reduce ? false : 'hidden'}
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={staggerContainer}
+        className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:p-10"
+      >
+        <motion.span
+          variants={revealUp}
+          className="inline-flex items-center gap-2 text-sb-accent-hot"
+        >
+          <ClipboardList aria-hidden className="size-4" />
+          <span className="text-xs font-semibold uppercase tracking-[0.22em]">Add your dot</span>
+        </motion.span>
+        <motion.h2
+          variants={revealUp}
+          className="mt-3 font-display text-[clamp(1.7rem,3vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.04em] text-sb-navy"
+        >
+          Where do you sit?
+        </motion.h2>
+        <motion.p
+          variants={revealUp}
+          className="mt-3 max-w-[52ch] text-[1.05rem] leading-[1.6] text-sb-text"
+        >
+          Take the 15-minute survey. We'll plot you anonymously alongside the team, and you'll see
+          the diversity is real.
+        </motion.p>
+        <motion.div variants={revealUp} className="mt-6">
+          <Button
+            asChild
+            className="rounded-full bg-sb-accent text-sb-white shadow-[0_4px_12px_rgba(212,166,73,0.35)] hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
+          >
+            <Link to="/survey">Take the survey</Link>
+          </Button>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+function Methodology({ reduce }: { reduce: boolean }) {
+  return (
+    <motion.section
+      initial={reduce ? false : 'hidden'}
+      whileInView="visible"
+      viewport={viewportOnce}
+      variants={staggerContainer}
+      className="mx-auto w-full max-w-3xl"
+    >
+      <motion.p variants={revealUp} className="text-xs leading-[1.7] text-sb-text-muted">
+        Axes are derived from the twelve policy domains in the Leadership Leanings Survey,
+        aggregated by the economic and social mapping recorded against each item in the survey
+        definition.
+      </motion.p>
+      <motion.p variants={revealUp} className="mt-3 text-xs leading-[1.7] text-sb-text-muted">
+        Member profiles are placeholders until enough real submissions exist. The visible spread
+        demonstrates how the chart will look once the team has filled it in.
+      </motion.p>
+    </motion.section>
+  );
 }

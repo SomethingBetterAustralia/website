@@ -13,7 +13,7 @@ export function PagePlaceholder({
 }: PagePlaceholderProps) {
   const reduce = useReducedMotion();
   return (
-    <section className="flex min-h-[60vh] items-center justify-center px-6 py-24">
+    <section className="flex min-h-[60vh] items-center justify-center px-6 pb-24 pt-12">
       <motion.div
         initial={reduce ? false : 'hidden'}
         animate="visible"

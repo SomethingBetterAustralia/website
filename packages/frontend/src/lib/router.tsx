@@ -8,8 +8,9 @@ export type Route =
   | '/financials'
   | '/karen'
   | '/bacon-board'
-  | '/moonshot'
+  | '/open'
   | '/recognition'
+  | '/survey'
   | '/donate';
 
 export const ROUTES: readonly Route[] = [
@@ -20,8 +21,9 @@ export const ROUTES: readonly Route[] = [
   '/financials',
   '/karen',
   '/bacon-board',
-  '/moonshot',
+  '/open',
   '/recognition',
+  '/survey',
   '/donate',
 ];
 
@@ -37,8 +39,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/financials', label: 'Financials' },
   { path: '/karen', label: 'Karen' },
   { path: '/bacon-board', label: 'Bacon Board' },
-  { path: '/moonshot', label: 'Moonshot' },
   { path: '/recognition', label: 'Recognition' },
+  { path: '/open', label: 'Open' },
 ];
 
 function isRoute(path: string): path is Route {
