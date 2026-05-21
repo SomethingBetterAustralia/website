@@ -20,13 +20,13 @@ import {
   type QuestCardProps,
 } from '@/components/bacon';
 import { Caveat } from '@/components/prose';
+import { CardFan } from '@/components/ui/CardFan';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 const BACON_REPO_URL = 'https://github.com/SomethingBetterAustralia/bacon-board';
 const SLIDE_DURATION_MS = 5000;
-const QUEST_DURATION_MS = 8000;
 
 type ReduceMotion = boolean | null;
 
@@ -325,23 +325,7 @@ function EndorsementMechanic({ reduce }: { reduce: ReduceMotion }) {
   );
 }
 
-const QUEST_CARD_WIDTH_PCT = 60;
-const QUEST_INACTIVE_SCALE = 0.95;
-
 function BaconQuests({ reduce }: { reduce: ReduceMotion }) {
-  const rolodexRef = React.useRef<HTMLDivElement | null>(null);
-  const inView = useInView(rolodexRef, { once: true, amount: 0.3 });
-  const [activeIndex, setActiveIndex] = React.useState(0);
-
-  React.useEffect(() => {
-    if (reduce || !inView) return;
-    const id = window.setInterval(
-      () => setActiveIndex((i) => (i + 1) % QUESTS.length),
-      QUEST_DURATION_MS,
-    );
-    return () => window.clearInterval(id);
-  }, [reduce, inView, activeIndex]);
-
   return (
     <section
       id="bacon-quests"
@@ -372,131 +356,29 @@ function BaconQuests({ reduce }: { reduce: ReduceMotion }) {
         Open, in motion, and closed — we publish every outcome, including the declines.
       </p>
 
-      {reduce ? (
-        <ul
-          role="list"
-          className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:grid-cols-2 min-[880px]:gap-8"
-        >
-          {QUESTS.map((q) => (
-            <li key={q.description}>
-              <QuestCard {...q} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <>
-          <ul
+      <CardFan
+        items={QUESTS}
+        getKey={(q) => q.description}
+        getLabel={(q) => q.description}
+        renderCard={(q) => <QuestCard {...q} />}
+        ariaLabel="Quests"
+        mobileFallback={
+          <motion.ul
             role="list"
-            className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:hidden"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="grid list-none grid-cols-1 gap-6 p-0"
           >
             {QUESTS.map((q) => (
-              <li key={q.description}>
+              <motion.li key={q.description} variants={revealUp}>
                 <QuestCard {...q} />
-              </li>
+              </motion.li>
             ))}
-          </ul>
-
-          <div ref={rolodexRef} className="hidden min-[880px]:block">
-            <div
-              className="relative h-[24rem]"
-              role="region"
-              aria-roledescription="carousel"
-              aria-label="Quests"
-            >
-              {QUESTS.map((q, i) => {
-                const isActive = i === activeIndex;
-                const stepPct =
-                  (100 - QUEST_CARD_WIDTH_PCT) / (QUESTS.length - 1);
-                const leftPct = i * stepPct;
-                const z = isActive
-                  ? 100
-                  : i < activeIndex
-                    ? i + 1
-                    : QUESTS.length - i;
-                return (
-                  <motion.div
-                    key={q.description}
-                    initial={false}
-                    animate={{
-                      scale: isActive ? 1 : QUEST_INACTIVE_SCALE,
-                      zIndex: z,
-                    }}
-                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: `${leftPct}%`,
-                      width: `${QUEST_CARD_WIDTH_PCT}%`,
-                      transformOrigin: 'center',
-                    }}
-                    onClick={() => setActiveIndex(i)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setActiveIndex(i);
-                      }
-                    }}
-                    role={isActive ? undefined : 'button'}
-                    tabIndex={isActive ? -1 : 0}
-                    aria-label={
-                      isActive ? undefined : `Show quest: ${q.description}`
-                    }
-                    aria-current={isActive ? 'true' : undefined}
-                    className={cn(
-                      'rounded-3xl',
-                      !isActive &&
-                        'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
-                    )}
-                  >
-                    <QuestCard {...q} />
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setActiveIndex((i) => (i - 1 + QUESTS.length) % QUESTS.length)}
-                aria-label="Previous quest"
-                className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
-              >
-                <ChevronLeft aria-hidden className="size-4" />
-              </button>
-              <div className="flex items-center gap-2">
-                {QUESTS.map((q, i) => (
-                  <button
-                    key={q.description}
-                    type="button"
-                    onClick={() => setActiveIndex(i)}
-                    aria-label={`Show quest ${i + 1}: ${q.description}`}
-                    aria-current={i === activeIndex ? 'true' : undefined}
-                    className={cn(
-                      'rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
-                      i === activeIndex
-                        ? 'size-2.5 bg-sb-accent-hot'
-                        : 'size-2 bg-sb-cream-warm hover:bg-sb-cream',
-                    )}
-                  />
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveIndex((i) => (i + 1) % QUESTS.length)}
-                aria-label="Next quest"
-                className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
-              >
-                <ChevronRight aria-hidden className="size-4" />
-              </button>
-            </div>
-
-            <p className="mt-3 text-center text-xs text-sb-text-muted">
-              {activeIndex + 1} of {QUESTS.length}
-            </p>
-          </div>
-        </>
-      )}
+          </motion.ul>
+        }
+      />
     </section>
   );
 }

@@ -35,7 +35,7 @@ export function DraftCard({
   openedDaysAgo,
 }: DraftCardProps) {
   return (
-    <article className="flex flex-col gap-4 rounded-2xl bg-sb-white p-6 ring-1 ring-sb-cream-warm min-[880px]:p-7">
+    <article className="flex h-full flex-col gap-4 rounded-2xl bg-sb-white p-6 ring-1 ring-sb-cream-warm min-[880px]:p-7">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <h3 className="font-display text-xl font-medium leading-snug tracking-tight text-sb-navy">
           {title}

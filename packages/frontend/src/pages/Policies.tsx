@@ -25,6 +25,7 @@ import {
   type ThemeCardProps,
 } from '@/components/policies';
 import { Caveat } from '@/components/prose';
+import { CardFan } from '@/components/ui/CardFan';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 
@@ -302,20 +303,29 @@ function PoliciesIdeas({ reduce }: { reduce: ReduceMotion }) {
         votes, and gracefully retire. That&rsquo;s expected &mdash; early-stage idea triage is
         the whole point.
       </motion.p>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:grid-cols-2 min-[880px]:gap-8"
-      >
-        {IDEAS.map((idea) => (
-          <motion.li key={idea.title} variants={revealUp}>
-            <IdeaCard {...idea} />
-          </motion.li>
-        ))}
-      </motion.ul>
+      <CardFan
+        items={IDEAS}
+        getKey={(idea) => idea.title}
+        getLabel={(idea) => idea.title}
+        renderCard={(idea) => <IdeaCard {...idea} />}
+        ariaLabel="Stage 1 ideas"
+        mobileFallback={
+          <motion.ul
+            role="list"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="grid list-none grid-cols-1 gap-6 p-0"
+          >
+            {IDEAS.map((idea) => (
+              <motion.li key={idea.title} variants={revealUp}>
+                <IdeaCard {...idea} />
+              </motion.li>
+            ))}
+          </motion.ul>
+        }
+      />
     </section>
   );
 }
@@ -359,20 +369,29 @@ function PoliciesThemes({ reduce }: { reduce: ReduceMotion }) {
         signal is which themes get support from members who otherwise disagree on most things.
         Those are what we promote to drafting.
       </motion.p>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:grid-cols-2 min-[880px]:gap-8"
-      >
-        {THEMES.map((theme) => (
-          <motion.li key={theme.title} variants={revealUp}>
-            <ThemeCard {...theme} />
-          </motion.li>
-        ))}
-      </motion.ul>
+      <CardFan
+        items={THEMES}
+        getKey={(theme) => theme.title}
+        getLabel={(theme) => theme.title}
+        renderCard={(theme) => <ThemeCard {...theme} />}
+        ariaLabel="Stage 2 themes"
+        mobileFallback={
+          <motion.ul
+            role="list"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="grid list-none grid-cols-1 gap-6 p-0"
+          >
+            {THEMES.map((theme) => (
+              <motion.li key={theme.title} variants={revealUp}>
+                <ThemeCard {...theme} />
+              </motion.li>
+            ))}
+          </motion.ul>
+        }
+      />
     </section>
   );
 }
@@ -416,20 +435,29 @@ function PoliciesDrafts({ reduce }: { reduce: ReduceMotion }) {
         bulk of the support. They produce a structured draft: the problem, the proposal, the
         evidence, the tradeoffs, the estimated cost, and the dissents.
       </motion.p>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="mx-auto flex max-w-[64ch] list-none flex-col gap-6 p-0"
-      >
-        {DRAFTS.map((draft) => (
-          <motion.li key={draft.title} variants={revealUp}>
-            <DraftCard {...draft} />
-          </motion.li>
-        ))}
-      </motion.ul>
+      <CardFan
+        items={DRAFTS}
+        getKey={(draft) => draft.title}
+        getLabel={(draft) => draft.title}
+        renderCard={(draft) => <DraftCard {...draft} />}
+        ariaLabel="Stage 3 drafts"
+        mobileFallback={
+          <motion.ul
+            role="list"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="mx-auto flex max-w-[64ch] list-none flex-col gap-6 p-0"
+          >
+            {DRAFTS.map((draft) => (
+              <motion.li key={draft.title} variants={revealUp}>
+                <DraftCard {...draft} />
+              </motion.li>
+            ))}
+          </motion.ul>
+        }
+      />
     </section>
   );
 }
@@ -457,9 +485,22 @@ function PoliciesAdopted({ reduce }: { reduce: ReduceMotion }) {
           variants={revealUp}
           className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
         >
-          Adopted, with dissent.
+          Adopted, dissents and all.
         </motion.h2>
       </motion.div>
+      <motion.p
+        initial={reduce ? false : 'hidden'}
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={revealUp}
+        className="mb-8 max-w-[64ch] text-[1.05rem] leading-[1.6] text-sb-text"
+      >
+        Drafts that complete review become party policy. When a draft is adopted, the full
+        record is published with it &mdash; the working group, the evidence base, and the
+        dissenting views from members who didn&rsquo;t sign on. Policies stay open to revision
+        as new evidence comes in. Adoption is the start of a position, not the end of the
+        conversation.
+      </motion.p>
       <motion.div
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
