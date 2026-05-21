@@ -1,14 +1,13 @@
 import {
   ArrowRight,
   ArrowUpRight,
+  Bell,
   BookOpen,
   BookOpenCheck,
   Bot,
-  Clock,
   Code2,
   Compass,
   DoorOpen,
-  Ear,
   Eye,
   FileText,
   Flag,
@@ -16,7 +15,6 @@ import {
   Globe,
   Network,
   Scale,
-  Search,
   Sparkles,
   Users,
   type LucideIcon,
@@ -106,42 +104,42 @@ const ARTEFACTS: readonly ArtefactRow[] = [
   },
 ];
 
-interface TravelRow {
+interface OpenPersonRow {
   readonly icon: LucideIcon;
   readonly label: string;
   readonly body: string;
 }
 
-const TRAVELS: readonly TravelRow[] = [
+const OPEN_PEOPLE: readonly OpenPersonRow[] = [
   {
-    icon: Globe,
-    label: 'Domain expertise across the political spectrum.',
-    body: 'Left and right working together when each is expert in something the other isn’t.',
+    icon: Users,
+    label: 'Members.',
+    body: 'Australians who want to be part of the work — bring a perspective, bring a problem, bring a sceptical eye.',
   },
   {
-    icon: Clock,
-    label: 'Long-term thinking.',
-    body: 'Decisions weighed against horizons longer than the next election.',
+    icon: Flag,
+    label: 'Candidates.',
+    body: 'People willing to stand on policy substance, not factional theatre.',
+  },
+  {
+    icon: GitBranch,
+    label: 'Contributors.',
+    body: 'Engineers, designers, researchers, writers — every artefact we publish takes outside hands to sharpen.',
   },
   {
     icon: Eye,
-    label: 'Open by default.',
-    body: 'Policy work, decisions, errata — visible.',
+    label: 'Sceptical critics.',
+    body: 'If you think we’re wrong, say so in public. We’ll publish corrections when you’re right.',
   },
   {
-    icon: Search,
-    label: 'Evidence-led.',
-    body: 'Where evidence and public opinion conflict, follow the evidence and explain why.',
+    icon: BookOpen,
+    label: 'Journalists and researchers.',
+    body: 'The methodology and the data are on the record. Use them, dispute them, attribute as you like.',
   },
   {
-    icon: Users,
-    label: 'Community-first.',
-    body: 'Members shape the party. The party doesn’t shape the members.',
-  },
-  {
-    icon: Ear,
-    label: 'No echo chambers.',
-    body: 'If everyone in the room agrees, the room is wrong.',
+    icon: Globe,
+    label: 'Friends abroad.',
+    body: 'Watchers in other countries thinking about what a movement like this could look like where you are.',
   },
 ];
 
@@ -152,10 +150,10 @@ export function Open() {
       <OpenHero reduce={reduce} />
       <OpenSkySection />
       <OpenPremise reduce={reduce} />
-      <OpenArtefacts reduce={reduce} />
-      <OpenTravels reduce={reduce} />
+      <OpenArtefactsAndTravels reduce={reduce} />
       <OpenOutsideAustralia reduce={reduce} />
       <OpenAustralianWork reduce={reduce} />
+      <OpenFinalCta reduce={reduce} />
     </div>
   );
 }
@@ -291,7 +289,7 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
       >
         <motion.p
           variants={revealUp}
-          className="max-w-[64ch] text-[1.05rem] leading-[1.65] text-sb-text"
+          className="text-[1.05rem] leading-[1.65] text-sb-text"
         >
           The political dysfunction Something Better Australia is responding to &mdash;
           short-termism, factional capture, performance over policy &mdash; isn&rsquo;t an
@@ -300,7 +298,7 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
         </motion.p>
         <motion.p
           variants={revealUp}
-          className="max-w-[64ch] text-[1.05rem] leading-[1.65] text-sb-text"
+          className="text-[1.05rem] leading-[1.65] text-sb-text"
         >
           Our response isn&rsquo;t to &lsquo;export&rsquo; anything. The problems are global;
           the solutions are local. What can travel is the methodology &mdash; how a party of
@@ -309,7 +307,7 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
         </motion.p>
         <motion.p
           variants={revealUp}
-          className="max-w-[64ch] text-[1.05rem] leading-[1.65] text-sb-text"
+          className="text-[1.05rem] leading-[1.65] text-sb-text"
         >
           That&rsquo;s why everything we build is in the open from day one. It&rsquo;s not a
           marketing move. It&rsquo;s that a methodology only travels if others can see it,
@@ -320,142 +318,151 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
   );
 }
 
-function OpenArtefacts({ reduce }: { reduce: ReduceMotion }) {
-  return (
-    <section id="open-artefacts" className="mx-auto w-full max-w-5xl scroll-mt-24 min-[880px]:scroll-mt-28">
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="mb-8 flex flex-col gap-2"
-      >
-        <motion.span
-          variants={revealUp}
-          className="inline-flex items-center gap-2 text-sb-accent-hot"
-        >
-          <GitBranch aria-hidden className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-            What&rsquo;s open
-          </span>
-        </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-        >
-          Everything we build, where it lives.
-        </motion.h2>
-      </motion.div>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="flex list-none flex-col gap-6 p-0"
-      >
-        {ARTEFACTS.map((row) => {
-          const Icon = row.icon;
-          return (
-            <motion.li key={row.label} variants={revealUp} className="flex items-start gap-4">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sb-accent/10">
-                <Icon aria-hidden className="size-5 text-sb-accent-hot" />
-              </span>
-              <div className="flex flex-col gap-1.5">
-                <p className="font-display text-[1.05rem] font-medium text-sb-navy">
-                  {row.label}
-                </p>
-                <p className="text-[1rem] leading-[1.55] text-sb-text-muted">
-                  {row.body}
-                  {row.kind === 'future' && (
-                    <span className="italic text-sb-text-muted/80"> (coming soon)</span>
-                  )}
-                </p>
-                {row.kind === 'external' && (
-                  <a
-                    href={row.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-fit items-center gap-1 text-sm font-medium text-sb-accent-hot hover:underline"
-                  >
-                    {row.linkLabel}
-                    <ArrowUpRight aria-hidden className="size-3.5" />
-                  </a>
-                )}
-                {row.kind === 'internal' && (
-                  <Link
-                    to={row.route}
-                    className="inline-flex w-fit items-center gap-1 text-sm font-medium text-sb-accent-hot hover:underline"
-                  >
-                    {row.linkLabel}
-                    <ArrowRight aria-hidden className="size-3.5" />
-                  </Link>
-                )}
-              </div>
-            </motion.li>
-          );
-        })}
-      </motion.ul>
-    </section>
-  );
-}
-
-function OpenTravels({ reduce }: { reduce: ReduceMotion }) {
+function OpenArtefactsAndTravels({ reduce }: { reduce: ReduceMotion }) {
   return (
     <section className="mx-auto w-full max-w-5xl">
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="mb-8 flex flex-col gap-2"
-      >
-        <motion.span
-          variants={revealUp}
-          className="inline-flex items-center gap-2 text-sb-accent-hot"
+      <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+        <div
+          id="open-artefacts"
+          className="scroll-mt-24 min-[880px]:scroll-mt-28"
         >
-          <Sparkles aria-hidden className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-            What travels
-          </span>
-        </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-        >
-          The shape of the work.
-        </motion.h2>
-      </motion.div>
-      <motion.p
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mb-8 max-w-[60ch] text-[1.05rem] leading-[1.6] text-sb-text"
-      >
-        Specific policies are local. Specific candidates are local. The shape of the work is
-        what we think travels &mdash; if it&rsquo;s useful at all.
-      </motion.p>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="flex list-none flex-col gap-6 p-0"
-      >
-        {TRAVELS.map(({ icon: Icon, label, body }) => (
-          <motion.li key={label} variants={revealUp} className="flex items-start gap-4">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sb-accent/10">
-              <Icon aria-hidden className="size-5 text-sb-accent-hot" />
-            </span>
-            <div className="flex flex-col gap-1">
-              <p className="font-display text-[1.05rem] font-medium text-sb-navy">{label}</p>
-              <p className="text-[1rem] leading-[1.55] text-sb-text-muted">{body}</p>
-            </div>
-          </motion.li>
-        ))}
-      </motion.ul>
+          <motion.div
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="mb-8 flex flex-col gap-2"
+          >
+            <motion.span
+              variants={revealUp}
+              className="inline-flex items-center gap-2 text-sb-accent-hot"
+            >
+              <GitBranch aria-hidden className="size-4" />
+              <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+                What&rsquo;s open
+              </span>
+            </motion.span>
+            <motion.h2
+              variants={revealUp}
+              className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
+            >
+              Everything we build, where it lives.
+            </motion.h2>
+          </motion.div>
+          <motion.ul
+            role="list"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="flex list-none flex-col gap-6 p-0"
+          >
+            {ARTEFACTS.map((row) => {
+              const Icon = row.icon;
+              return (
+                <motion.li
+                  key={row.label}
+                  variants={revealUp}
+                  className="flex items-start gap-4"
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sb-accent/10">
+                    <Icon aria-hidden className="size-5 text-sb-accent-hot" />
+                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    <p className="font-display text-[1.05rem] font-medium text-sb-navy">
+                      {row.label}
+                    </p>
+                    <p className="text-[1rem] leading-[1.55] text-sb-text-muted">
+                      {row.body}
+                      {row.kind === 'future' && (
+                        <span className="italic text-sb-text-muted/80"> (coming soon)</span>
+                      )}
+                    </p>
+                    {row.kind === 'external' && (
+                      <a
+                        href={row.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-fit items-center gap-1 text-sm font-medium text-sb-accent-hot hover:underline"
+                      >
+                        {row.linkLabel}
+                        <ArrowUpRight aria-hidden className="size-3.5" />
+                      </a>
+                    )}
+                    {row.kind === 'internal' && (
+                      <Link
+                        to={row.route}
+                        className="inline-flex w-fit items-center gap-1 text-sm font-medium text-sb-accent-hot hover:underline"
+                      >
+                        {row.linkLabel}
+                        <ArrowRight aria-hidden className="size-3.5" />
+                      </Link>
+                    )}
+                  </div>
+                </motion.li>
+              );
+            })}
+          </motion.ul>
+        </div>
+
+        <div>
+          <motion.div
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="mb-8 flex flex-col gap-2"
+          >
+            <motion.span
+              variants={revealUp}
+              className="inline-flex items-center gap-2 text-sb-accent-hot"
+            >
+              <Sparkles aria-hidden className="size-4" />
+              <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+                Who&rsquo;s Open
+              </span>
+            </motion.span>
+            <motion.h2
+              variants={revealUp}
+              className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
+            >
+              Who the door is open to.
+            </motion.h2>
+          </motion.div>
+          <motion.p
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={revealUp}
+            className="mb-8 max-w-[60ch] text-[1.05rem] leading-[1.6] text-sb-text"
+          >
+            Open isn&rsquo;t only what we publish. It&rsquo;s who we work with &mdash; and who
+            the door is open to.
+          </motion.p>
+          <motion.ul
+            role="list"
+            initial={reduce ? false : 'hidden'}
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={staggerContainer}
+            className="flex list-none flex-col gap-6 p-0"
+          >
+            {OPEN_PEOPLE.map(({ icon: Icon, label, body }) => (
+              <motion.li key={label} variants={revealUp} className="flex items-start gap-4">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sb-accent/10">
+                  <Icon aria-hidden className="size-5 text-sb-accent-hot" />
+                </span>
+                <div className="flex flex-col gap-1">
+                  <p className="font-display text-[1.05rem] font-medium text-sb-navy">
+                    {label}
+                  </p>
+                  <p className="text-[1rem] leading-[1.55] text-sb-text-muted">{body}</p>
+                </div>
+              </motion.li>
+            ))}
+          </motion.ul>
+        </div>
+      </div>
     </section>
   );
 }
@@ -476,56 +483,88 @@ function OpenOutsideAustralia({ reduce }: { reduce: ReduceMotion }) {
 
 function OpenAustralianWork({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-5xl">
+    <motion.section
+      initial={reduce ? false : 'hidden'}
+      whileInView="visible"
+      viewport={viewportOnce}
+      variants={staggerContainer}
+      className="mx-auto w-full max-w-5xl"
+    >
+      <div className="relative overflow-hidden rounded-3xl bg-sb-navy p-6 text-sb-cream shadow-[0_18px_40px_rgba(8,31,52,0.18)] ring-1 ring-sb-navy min-[880px]:p-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-sb-accent/15 mix-blend-soft-light blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-16 size-64 rounded-full bg-sb-accent-hot/15 mix-blend-soft-light blur-3xl"
+        />
+        <div className="relative flex flex-col gap-5">
+          <motion.span
+            variants={revealUp}
+            className="inline-flex items-center gap-2 text-sb-accent"
+          >
+            <Flag aria-hidden className="size-4" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+              Where the work is
+            </span>
+          </motion.span>
+          <motion.h2
+            variants={revealUp}
+            className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-medium italic leading-[1.1] tracking-[-0.04em] text-sb-accent"
+          >
+            Start here.
+          </motion.h2>
+          <motion.p
+            variants={revealUp}
+            className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-cream/90"
+          >
+            Everything above only exists because of the work happening in Australia right
+            now. If you&rsquo;d like to be part of it &mdash; as a member, a candidate, a
+            contributor, or a sceptical critic &mdash; start here.
+          </motion.p>
+          <motion.div variants={revealUp}>
+            <Button
+              asChild
+              className="rounded-full bg-sb-accent text-sb-navy hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
+            >
+              <Link to="/">
+                <Flag aria-hidden className="size-4" />
+                Join the Australian movement
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+function OpenFinalCta({ reduce }: { reduce: ReduceMotion }) {
+  return (
+    <section className="mx-auto w-full max-w-3xl text-center">
       <motion.div
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
         viewport={viewportOnce}
         variants={staggerContainer}
-        className="mb-8 flex flex-col gap-2"
+        className="flex flex-col items-center gap-3"
       >
         <motion.span
           variants={revealUp}
           className="inline-flex items-center gap-2 text-sb-accent-hot"
         >
-          <Flag aria-hidden className="size-4" />
+          <Bell aria-hidden className="size-4" />
           <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-            Where the work is
+            Stay in the loop
           </span>
         </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-        >
-          Start here.
-        </motion.h2>
-      </motion.div>
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="flex flex-col gap-5"
-      >
-        <motion.p
-          variants={revealUp}
-          className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-text"
-        >
-          Everything above only exists because of the work happening in Australia right now. If
-          you&rsquo;d like to be part of it &mdash; as a member, a candidate, a contributor, or
-          a sceptical critic &mdash; start here.
+        <motion.p variants={revealUp} className="text-[1.05rem] leading-[1.6] text-sb-text">
+          Want to know what we open next?{' '}
+          <Link to="/" className="font-medium text-sb-accent-hot hover:underline">
+            Subscribe on the home page.
+          </Link>
         </motion.p>
-        <motion.div variants={revealUp}>
-          <Button
-            asChild
-            className="rounded-full bg-sb-navy text-sb-cream hover:bg-sb-navy-hot focus-visible:ring-sb-accent"
-          >
-            <Link to="/">
-              <Flag aria-hidden className="size-4" />
-              Join the Australian movement
-            </Link>
-          </Button>
-        </motion.div>
       </motion.div>
     </section>
   );
