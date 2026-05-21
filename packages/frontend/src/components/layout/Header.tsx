@@ -39,7 +39,7 @@ export function Header() {
       className={cn(
         'sticky top-0 z-50 w-full transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300',
         scrolled
-          ? 'border-b border-sb-cream-warm bg-sb-white/90 shadow-[0_2px_10px_rgba(8,31,52,0.05)] backdrop-blur-md'
+          ? 'border-b border-sb-cream-warm bg-sb-white shadow-[0_2px_10px_rgba(8,31,52,0.05)]'
           : 'border-b border-transparent bg-sb-white'
       )}
     >
@@ -95,7 +95,7 @@ export function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="overflow-hidden border-t border-sb-cream-warm bg-sb-white/95 backdrop-blur-md min-[880px]:hidden"
+            className="overflow-hidden border-t border-sb-cream-warm bg-sb-white min-[880px]:hidden"
           >
             <nav
               aria-label="Mobile"
