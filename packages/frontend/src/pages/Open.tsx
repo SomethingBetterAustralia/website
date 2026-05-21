@@ -24,6 +24,7 @@ import {
 import { motion, useReducedMotion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { OpenSky } from '@/components/open';
+import { Caveat } from '@/components/prose';
 import { Link, type Route } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 
@@ -321,7 +322,7 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
 
 function OpenArtefacts({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section id="open-artefacts" className="mx-auto w-full max-w-5xl">
+    <section id="open-artefacts" className="mx-auto w-full max-w-5xl scroll-mt-24 min-[880px]:scroll-mt-28">
       <motion.div
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
@@ -461,23 +462,15 @@ function OpenTravels({ reduce }: { reduce: ReduceMotion }) {
 
 function OpenOutsideAustralia({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mx-auto max-w-[62ch] border-l-4 border-sb-accent pl-5 text-lg italic leading-[1.6] text-sb-text min-[880px]:text-xl"
-      >
-        If you&rsquo;re reading from outside Australia and any of this resonates &mdash; as an
-        organiser, a researcher, a journalist, or someone wondering what a movement like this
-        could look like where you are &mdash; please get in touch. We are not running
-        international chapters and we have no plans to. But we are happy to share what we&rsquo;re
-        learning, send you the relevant repos, introduce you to people in our network where it
-        makes sense, and learn from whatever you build. There is nothing to join from outside
-        Australia yet. There is a conversation to have.
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      If you&rsquo;re reading from outside Australia and any of this resonates &mdash; as an
+      organiser, a researcher, a journalist, or someone wondering what a movement like this
+      could look like where you are &mdash; please get in touch. We are not running
+      international chapters and we have no plans to. But we are happy to share what we&rsquo;re
+      learning, send you the relevant repos, introduce you to people in our network where it
+      makes sense, and learn from whatever you build. There is nothing to join from outside
+      Australia yet. There is a conversation to have.
+    </Caveat>
   );
 }
 

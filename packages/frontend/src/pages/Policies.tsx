@@ -19,6 +19,7 @@ import {
   type IdeaCardProps,
   type ThemeCardProps,
 } from '@/components/policies';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 
@@ -228,7 +229,7 @@ function PoliciesHero({ reduce }: { reduce: ReduceMotion }) {
 
 function PoliciesFunnelSection({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section id="policy-funnel" className="mx-auto w-full max-w-5xl">
+    <section id="policy-funnel" className="mx-auto w-full max-w-5xl scroll-mt-24 min-[880px]:scroll-mt-28">
       <motion.div
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
@@ -474,24 +475,16 @@ function PoliciesAdopted({ reduce }: { reduce: ReduceMotion }) {
 
 function PoliciesHowThisWorks({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mx-auto max-w-[62ch] border-l-4 border-sb-accent pl-5 text-lg italic leading-[1.6] text-sb-text min-[880px]:text-xl"
-      >
-        This page describes the model. The platform that runs it doesn&rsquo;t exist yet
-        &mdash; what you&rsquo;re seeing are illustrative examples. We are building it openly:
-        the consensus voting will use established open-source tooling, the working-group
-        software will be ours, and every draft will be published under permissive licenses for
-        other chapters (and other countries) to adapt. None of the people listed in the mock
-        working groups are real. Real people will join real working groups once the platform
-        opens; everyone whose idea contributes to a draft is credited by name (or by anonymous
-        handle if they prefer).
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      This page describes the model. The platform that runs it doesn&rsquo;t exist yet
+      &mdash; what you&rsquo;re seeing are illustrative examples. We are building it openly:
+      the consensus voting will use established open-source tooling, the working-group
+      software will be ours, and every draft will be published under permissive licenses for
+      other chapters (and other countries) to adapt. None of the people listed in the mock
+      working groups are real. Real people will join real working groups once the platform
+      opens; everyone whose idea contributes to a draft is credited by name (or by anonymous
+      handle if they prefer).
+    </Caveat>
   );
 }
 

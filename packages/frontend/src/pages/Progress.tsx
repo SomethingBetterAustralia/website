@@ -36,6 +36,7 @@ import {
   type StatCardProps,
   type StateBreakdownDatum,
 } from '@/components/progress';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -629,22 +630,14 @@ function ProgressEngagement({ reduce }: { reduce: ReduceMotion }) {
 
 function ProgressCaveat({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mx-auto max-w-[62ch] border-l-4 border-sb-accent pl-5 text-lg italic leading-[1.6] text-sb-text min-[880px]:text-xl"
-      >
-        Where these numbers come from: most are real but small &mdash; signups,
-        volunteer-logged hours, GitHub activity. A few are estimates while the platform
-        that will track them precisely is still being built (notably the Bacon Board
-        figures and the policy funnel counts). The &lsquo;as of&rsquo; date at the top of
-        this page applies to everything. When the platform is live, every number on this
-        page will be live too.
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      Where these numbers come from: most are real but small &mdash; signups,
+      volunteer-logged hours, GitHub activity. A few are estimates while the platform
+      that will track them precisely is still being built (notably the Bacon Board
+      figures and the policy funnel counts). The &lsquo;as of&rsquo; date at the top of
+      this page applies to everything. When the platform is live, every number on this
+      page will be live too.
+    </Caveat>
   );
 }
 

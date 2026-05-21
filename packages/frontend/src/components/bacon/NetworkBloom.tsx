@@ -15,39 +15,39 @@ interface Edge {
   readonly level: 1 | 2 | 3 | 4;
 }
 
-const STARTER = { cx: 300, cy: 460, r: 9 } as const;
-const DEST = { cx: 300, cy: 60, r: 11 } as const;
+const STARTER = { cx: 60, cy: 250, r: 9 } as const;
+const DEST = { cx: 540, cy: 250, r: 11 } as const;
 
 const L1: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: 100, cy: 360, r: 6 },
-  { cx: 200, cy: 360, r: 6 },
-  { cx: 300, cy: 360, r: 6 },
-  { cx: 400, cy: 360, r: 6 },
-  { cx: 500, cy: 360, r: 6 },
+  { cx: 180, cy: 60, r: 6 },
+  { cx: 180, cy: 155, r: 6 },
+  { cx: 180, cy: 250, r: 6 },
+  { cx: 180, cy: 345, r: 6 },
+  { cx: 180, cy: 440, r: 6 },
 ];
 
 const L2: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: 90, cy: 240, r: 5 },
-  { cx: 150, cy: 240, r: 5 },
-  { cx: 210, cy: 240, r: 5 },
-  { cx: 250, cy: 240, r: 5 },
-  { cx: 290, cy: 240, r: 5 },
-  { cx: 310, cy: 240, r: 5 },
-  { cx: 350, cy: 240, r: 5 },
-  { cx: 390, cy: 240, r: 5 },
-  { cx: 450, cy: 240, r: 5 },
-  { cx: 510, cy: 240, r: 5 },
+  { cx: 300, cy: 50, r: 5 },
+  { cx: 300, cy: 100, r: 5 },
+  { cx: 300, cy: 150, r: 5 },
+  { cx: 300, cy: 195, r: 5 },
+  { cx: 300, cy: 235, r: 5 },
+  { cx: 300, cy: 265, r: 5 },
+  { cx: 300, cy: 305, r: 5 },
+  { cx: 300, cy: 350, r: 5 },
+  { cx: 300, cy: 400, r: 5 },
+  { cx: 300, cy: 450, r: 5 },
 ];
 
 const L3: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: 160, cy: 140, r: 4 },
-  { cx: 220, cy: 140, r: 4 },
-  { cx: 260, cy: 140, r: 4 },
-  { cx: 290, cy: 140, r: 4 },
-  { cx: 310, cy: 140, r: 4 },
-  { cx: 340, cy: 140, r: 4 },
-  { cx: 380, cy: 140, r: 4 },
-  { cx: 440, cy: 140, r: 4 },
+  { cx: 420, cy: 130, r: 4 },
+  { cx: 420, cy: 175, r: 4 },
+  { cx: 420, cy: 215, r: 4 },
+  { cx: 420, cy: 245, r: 4 },
+  { cx: 420, cy: 265, r: 4 },
+  { cx: 420, cy: 295, r: 4 },
+  { cx: 420, cy: 335, r: 4 },
+  { cx: 420, cy: 380, r: 4 },
 ];
 
 const INTERMEDIATE_NODES: readonly Node[] = [
@@ -112,6 +112,24 @@ function levelKeyframes(level: 1 | 2 | 3 | 4) {
   };
 }
 
+function FlowGradientDef() {
+  return (
+    <defs>
+      <linearGradient
+        id="bacon-flow"
+        gradientUnits="userSpaceOnUse"
+        x1="0"
+        y1="0"
+        x2="600"
+        y2="0"
+      >
+        <stop offset="0%" stopOpacity={0.55} style={{ stopColor: 'var(--color-sb-accent)' }} />
+        <stop offset="100%" stopOpacity={0.55} style={{ stopColor: 'var(--color-sb-accent-hot)' }} />
+      </linearGradient>
+    </defs>
+  );
+}
+
 export function NetworkBloom() {
   const reduce = useReducedMotion();
   if (reduce) {
@@ -120,8 +138,9 @@ export function NetworkBloom() {
         viewBox="0 0 600 500"
         className="h-auto w-full"
         role="img"
-        aria-label="Network of forwarding chains converging on a destination"
+        aria-label="Network of forwarding endorsements converging on a destination"
       >
+        <FlowGradientDef />
         {EDGES.map((e, i) => (
           <line
             key={`e${i}`}
@@ -130,7 +149,7 @@ export function NetworkBloom() {
             x2={e.toCx}
             y2={e.toCy}
             strokeWidth={1.5}
-            className="stroke-sb-cream-warm"
+            stroke="url(#bacon-flow)"
             fill="none"
           />
         ))}
@@ -156,8 +175,9 @@ export function NetworkBloom() {
       viewBox="0 0 600 500"
       className="h-auto w-full"
       role="img"
-      aria-label="Network of forwarding chains converging on a destination"
+      aria-label="Network of forwarding endorsements converging on a destination"
     >
+      <FlowGradientDef />
       {EDGES.map((e, i) => {
         const kf = levelKeyframes(e.level);
         return (
@@ -168,7 +188,7 @@ export function NetworkBloom() {
             x2={e.toCx}
             y2={e.toCy}
             strokeWidth={1.5}
-            className="stroke-sb-cream-warm"
+            stroke="url(#bacon-flow)"
             fill="none"
             animate={{ pathLength: kf.values, opacity: kf.values }}
             transition={{ duration: 12, times: kf.times, repeat: Infinity, ease: 'linear' }}

@@ -23,6 +23,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/rea
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { AnnotatedTranscript, CapabilityCard } from '@/components/karen';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -202,7 +203,7 @@ function KarenTranscriptSection({ reduce }: { reduce: ReduceMotion }) {
 
 function KarenWhatAndHow({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section id="karen-capabilities" className="mx-auto w-full max-w-5xl">
+    <section id="karen-capabilities" className="mx-auto w-full max-w-5xl scroll-mt-24 min-[880px]:scroll-mt-28">
       <div className="grid grid-cols-1 gap-12 min-[880px]:grid-cols-2 min-[880px]:gap-10 min-[880px]:items-start">
         <CapabilitiesPanel reduce={reduce} />
         <PrinciplesPanel reduce={reduce} />
@@ -394,20 +395,12 @@ function PrinciplesPanel({ reduce }: { reduce: ReduceMotion }) {
 
 function KarenNotThis({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mx-auto max-w-[58ch] border-l-4 border-sb-accent pl-5 text-lg italic leading-[1.6] text-sb-text-muted min-[880px]:text-xl"
-      >
-        Karen is not a judge, not a partisan tool, not a replacement for journalism, and not
-        always right. She is a research assistant — fast, sourced, plural, transparent — and she
-        is only as good as the prompts, sources, and people behind her. All of which you can
-        see.
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      Karen is not a judge, not a partisan tool, not a replacement for journalism, and not
+      always right. She is a research assistant — fast, sourced, plural, transparent — and she
+      is only as good as the prompts, sources, and people behind her. All of which you can
+      see.
+    </Caveat>
   );
 }
 

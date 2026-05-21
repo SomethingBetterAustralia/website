@@ -29,6 +29,7 @@ import {
   type LineChartDatum,
   type StateBreakdownDatum,
 } from '@/components/progress';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -566,23 +567,15 @@ function ArchitectureRepoPill({ reduce }: { reduce: ReduceMotion }) {
 
 function FinancialsCaveat({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="mx-auto max-w-[62ch] border-l-4 border-sb-accent pl-5 text-lg italic leading-[1.6] text-sb-text min-[880px]:text-xl"
-      >
-        What&rsquo;s not on the ledger: individual donor identities are aggregated by default,
-        in line with the AEC&rsquo;s privacy regime. Donors who specifically request public
-        acknowledgment are named in the description column; everyone else appears as
-        &lsquo;Individual donation&rsquo; with no identifying information. Charlotte&rsquo;s
-        founder contributions are named openly because she has consented. There is a 1&ndash;3
-        day lag between a transaction settling and appearing here &mdash; bank reconciliation
-        takes time, and we&rsquo;d rather be slow and right than fast and wrong.
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      What&rsquo;s not on the ledger: individual donor identities are aggregated by default,
+      in line with the AEC&rsquo;s privacy regime. Donors who specifically request public
+      acknowledgment are named in the description column; everyone else appears as
+      &lsquo;Individual donation&rsquo; with no identifying information. Charlotte&rsquo;s
+      founder contributions are named openly because she has consented. There is a 1&ndash;3
+      day lag between a transaction settling and appearing here &mdash; bank reconciliation
+      takes time, and we&rsquo;d rather be slow and right than fast and wrong.
+    </Caveat>
   );
 }
 

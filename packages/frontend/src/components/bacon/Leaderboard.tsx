@@ -7,21 +7,21 @@ interface LeaderboardEntry {
   readonly rank: number;
   readonly handle: string;
   readonly isAnonymous: boolean;
-  readonly chainsClosed: number;
+  readonly endorsementsClosed: number;
   readonly bestBaconNumber: number;
-  readonly chainsInMotion: number;
+  readonly endorsementsInMotion: number;
 }
 
-// MOCK: leaderboard entries until the real game starts producing closed chains.
+// MOCK: leaderboard entries until the real game starts producing closed endorsements.
 const ENTRIES: readonly LeaderboardEntry[] = [
-  { rank: 1, handle: 'Margot K.', isAnonymous: false, chainsClosed: 12, bestBaconNumber: 3, chainsInMotion: 4 },
-  { rank: 2, handle: 'Anonymous Connector #12', isAnonymous: true, chainsClosed: 9, bestBaconNumber: 3, chainsInMotion: 2 },
-  { rank: 3, handle: 'Hassan T.', isAnonymous: false, chainsClosed: 8, bestBaconNumber: 4, chainsInMotion: 3 },
-  { rank: 4, handle: 'Lena O.', isAnonymous: false, chainsClosed: 7, bestBaconNumber: 4, chainsInMotion: 1 },
-  { rank: 5, handle: 'Anonymous Connector #41', isAnonymous: true, chainsClosed: 6, bestBaconNumber: 4, chainsInMotion: 5 },
-  { rank: 6, handle: 'Priya S.', isAnonymous: false, chainsClosed: 5, bestBaconNumber: 5, chainsInMotion: 2 },
-  { rank: 7, handle: 'Anonymous Connector #08', isAnonymous: true, chainsClosed: 4, bestBaconNumber: 5, chainsInMotion: 0 },
-  { rank: 8, handle: 'Marko V.', isAnonymous: false, chainsClosed: 3, bestBaconNumber: 5, chainsInMotion: 1 },
+  { rank: 1, handle: 'Margot K.', isAnonymous: false, endorsementsClosed: 12, bestBaconNumber: 3, endorsementsInMotion: 4 },
+  { rank: 2, handle: 'Anonymous Connector #12', isAnonymous: true, endorsementsClosed: 9, bestBaconNumber: 3, endorsementsInMotion: 2 },
+  { rank: 3, handle: 'Hassan T.', isAnonymous: false, endorsementsClosed: 8, bestBaconNumber: 4, endorsementsInMotion: 3 },
+  { rank: 4, handle: 'Lena O.', isAnonymous: false, endorsementsClosed: 7, bestBaconNumber: 4, endorsementsInMotion: 1 },
+  { rank: 5, handle: 'Anonymous Connector #41', isAnonymous: true, endorsementsClosed: 6, bestBaconNumber: 4, endorsementsInMotion: 5 },
+  { rank: 6, handle: 'Priya S.', isAnonymous: false, endorsementsClosed: 5, bestBaconNumber: 5, endorsementsInMotion: 2 },
+  { rank: 7, handle: 'Anonymous Connector #08', isAnonymous: true, endorsementsClosed: 4, bestBaconNumber: 5, endorsementsInMotion: 0 },
+  { rank: 8, handle: 'Marko V.', isAnonymous: false, endorsementsClosed: 3, bestBaconNumber: 5, endorsementsInMotion: 1 },
 ];
 
 const FILTER_LABELS = ['All', 'Named only', 'Anonymous only'] as const;
@@ -81,7 +81,7 @@ export function Leaderboard() {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-sb-text-muted">
               <div className="inline-flex items-center gap-1">
                 <Trophy aria-hidden className="size-3.5" />
-                {e.chainsClosed} closed
+                {e.endorsementsClosed} closed
               </div>
               <div className="inline-flex items-center gap-1">
                 <Hash aria-hidden className="size-3.5" />
@@ -89,14 +89,14 @@ export function Leaderboard() {
               </div>
               <div className="inline-flex items-center gap-1">
                 <Network aria-hidden className="size-3.5" />
-                {e.chainsInMotion} in motion
+                {e.endorsementsInMotion} in motion
               </div>
             </div>
           </motion.li>
         ))}
       </motion.ul>
       <p className="text-xs italic text-sb-text-muted">
-        Showing example data. The real leaderboard begins with the first closed chain.
+        Showing example data. The real leaderboard begins with the first closed endorsement.
       </p>
     </div>
   );

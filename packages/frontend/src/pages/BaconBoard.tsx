@@ -1,17 +1,16 @@
 import {
-  ArrowUpRight,
   Bell,
   Check,
-  Compass,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   ExternalLink,
   GitBranch,
   Network,
-  PlayCircle,
   Sparkles,
   Trophy,
 } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,10 +19,14 @@ import {
   QuestCard,
   type QuestCardProps,
 } from '@/components/bacon';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 const BACON_REPO_URL = 'https://github.com/SomethingBetterAustralia/bacon-board';
+const SLIDE_DURATION_MS = 5000;
+const QUEST_DURATION_MS = 8000;
 
 type ReduceMotion = boolean | null;
 
@@ -37,11 +40,11 @@ const RULES: readonly Rule[] = [
   {
     number: '01',
     headline: 'SBA lists a quest, by description.',
-    body: 'Someone we would like to have a conversation with — described, not named, while the chain is in motion.',
+    body: 'Someone we would like to have a conversation with — described, not named, while the endorsement is in motion.',
   },
   {
     number: '02',
-    headline: 'You start a chain.',
+    headline: 'You start an endorsement.',
     body: 'From the quest page, request a private link. The link is yours, but it has five charges.',
   },
   {
@@ -51,13 +54,13 @@ const RULES: readonly Rule[] = [
   },
   {
     number: '04',
-    headline: 'The chain branches outward.',
+    headline: 'The endorsement branches outward.',
     body: 'Each forwarder learns the destination’s name when they decide to forward — so they can choose who is closer. Degrees of separation and elapsed time are tracked.',
   },
   {
     number: '05',
-    headline: 'The chain closes through a warm introduction.',
-    body: 'The closing forwarder — who personally knows the destination — makes a discreet introduction on SBA’s behalf. If the destination accepts a conversation, the chain is recorded and can be closed publicly. If they decline, the chain ends quietly. No second chain is ever started toward the same person.',
+    headline: 'The endorsement closes through a warm introduction.',
+    body: 'The closing forwarder — who personally knows the destination — makes a discreet introduction on SBA’s behalf. If the destination accepts a conversation, the endorsement is recorded and can be closed publicly. If they decline, the endorsement ends quietly. No second endorsement is ever started toward the same person.',
   },
 ];
 
@@ -67,7 +70,7 @@ const QUESTS: readonly QuestCardProps[] = [
     status: 'open',
     description: 'A respected economist in regional NSW',
     reason: 'Their work on rural cost-of-living would sharpen our housing thinking.',
-    chainsInMotion: 0,
+    endorsementsInMotion: 0,
     bestBaconNumber: null,
     daysOpen: 2,
     isMockNote: 'Example only — real quests launch with the game.',
@@ -76,7 +79,7 @@ const QUESTS: readonly QuestCardProps[] = [
     status: 'in-motion',
     description: 'A former independent MP, possibly returning',
     reason: 'We would like to hear what would make them say yes.',
-    chainsInMotion: 14,
+    endorsementsInMotion: 14,
     bestBaconNumber: null,
     daysOpen: 9,
     isMockNote: 'Example only — real quests launch with the game.',
@@ -85,7 +88,7 @@ const QUESTS: readonly QuestCardProps[] = [
     status: 'closed-accepted',
     description: 'A leader in disability advocacy',
     reason: 'Their critique of our policy framing made us rethink the brief.',
-    chainsInMotion: 6,
+    endorsementsInMotion: 6,
     bestBaconNumber: 4,
     daysOpen: 18,
     outcome: 'Conversation took place. The destination preferred not to be named publicly.',
@@ -95,10 +98,10 @@ const QUESTS: readonly QuestCardProps[] = [
     status: 'closed-declined',
     description: 'A senior climate scientist with policy experience',
     reason: 'Their experience translating models into policy briefs is exactly what we need on energy.',
-    chainsInMotion: 3,
+    endorsementsInMotion: 3,
     bestBaconNumber: null,
     daysOpen: 22,
-    outcome: 'Politely declined. Following our rules, no new chain will ever be started toward this person.',
+    outcome: 'Politely declined. Following our rules, no new endorsement will ever be started toward this person.',
     isMockNote: 'Example only — real quests launch with the game.',
   },
 ];
@@ -107,11 +110,9 @@ export function BaconBoard() {
   const reduce = useReducedMotion();
   return (
     <div className="flex flex-col gap-16 px-6 pb-24 pt-6 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-10">
-      <BaconHero reduce={reduce} />
-      <BaconBloomSection reduce={reduce} />
-      <BaconRules reduce={reduce} />
-      <BaconQuests reduce={reduce} />
+      <BaconHeroSection reduce={reduce} />
       <BaconLeaderboardSection reduce={reduce} />
+      <BaconQuests reduce={reduce} />
       <BaconConduct reduce={reduce} />
       <BaconContribute reduce={reduce} />
       <BaconFinalCta reduce={reduce} />
@@ -119,13 +120,24 @@ export function BaconBoard() {
   );
 }
 
-function BaconHero({ reduce }: { reduce: ReduceMotion }) {
+function BaconHeroSection({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <motion.header
+    <section className="mx-auto w-full max-w-5xl">
+      <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+        <BaconHeader reduce={reduce} />
+        <EndorsementMechanic reduce={reduce} />
+      </div>
+    </section>
+  );
+}
+
+function BaconHeader({ reduce }: { reduce: ReduceMotion }) {
+  return (
+    <motion.div
       initial={reduce ? false : 'hidden'}
       animate="visible"
       variants={staggerContainer}
-      className="mx-auto flex w-full max-w-5xl flex-col items-start gap-5"
+      className="flex w-full flex-col items-start gap-5"
     >
       <motion.span
         variants={revealUp}
@@ -156,25 +168,15 @@ function BaconHero({ reduce }: { reduce: ReduceMotion }) {
         className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-text"
       >
         Something Better Australia names conversations it would like to have — by description,
-        not by name — and the community uses chains of trusted forwards to bridge to those
-        conversations. A chain closes when someone in the destination&rsquo;s orbit makes a warm
-        introduction on our behalf, and the destination chooses to accept. No cold messages. No
-        mass campaigns.
+        not by name — and the community uses endorsements of trusted forwards to bridge to those
+        conversations. An endorsement closes when someone in the destination&rsquo;s orbit makes
+        a warm introduction on our behalf, and the destination chooses to accept. No cold
+        messages. No mass campaigns.
       </motion.p>
       <motion.div
         variants={revealUp}
         className="mt-2 flex flex-col gap-3 min-[880px]:flex-row min-[880px]:items-center"
       >
-        <Button
-          asChild
-          className="rounded-full bg-sb-accent text-sb-navy hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
-        >
-          <a href="#bacon-rules">
-            <PlayCircle aria-hidden className="size-4" />
-            How to play
-            <ArrowUpRight aria-hidden className="size-4" />
-          </a>
-        </Button>
         <Button
           asChild
           variant="ghost"
@@ -183,100 +185,168 @@ function BaconHero({ reduce }: { reduce: ReduceMotion }) {
           <a href="#bacon-quests">See the open quests</a>
         </Button>
       </motion.div>
-    </motion.header>
+    </motion.div>
   );
 }
 
-function BaconBloomSection({ reduce }: { reduce: ReduceMotion }) {
-  return (
-    <section className="mx-auto w-full max-w-5xl">
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="mb-8 flex flex-col gap-2"
-      >
-        <motion.span
-          variants={revealUp}
-          className="inline-flex items-center gap-2 text-sb-accent-hot"
-        >
-          <Network aria-hidden className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">The mechanic</span>
-        </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-        >
-          How a chain blooms
-        </motion.h2>
-      </motion.div>
-      <div className="mx-auto w-full max-w-[680px]">
-        <NetworkBloom />
-      </div>
-      <p className="mx-auto mt-4 max-w-[58ch] text-center text-sm italic leading-[1.6] text-sb-text-muted">
-        Chains close through warm introductions, not cold messages. Names appear only when the
-        destination accepts the conversation.
-      </p>
-    </section>
-  );
-}
+function EndorsementMechanic({ reduce }: { reduce: ReduceMotion }) {
+  const sectionRef = React.useRef<HTMLDivElement | null>(null);
+  const inView = useInView(sectionRef, { once: true, amount: 0.4 });
+  const [activeIndex, setActiveIndex] = React.useState(0);
 
-function BaconRules({ reduce }: { reduce: ReduceMotion }) {
+  React.useEffect(() => {
+    if (reduce || !inView) return;
+    const id = window.setInterval(
+      () => setActiveIndex((i) => (i + 1) % RULES.length),
+      SLIDE_DURATION_MS,
+    );
+    return () => window.clearInterval(id);
+  }, [reduce, inView, activeIndex]);
+
+  const active = RULES[activeIndex];
+
   return (
-    <section id="bacon-rules" className="mx-auto w-full max-w-5xl">
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="mb-8 flex flex-col gap-2"
+    <motion.div
+      ref={sectionRef}
+      initial={reduce ? false : 'hidden'}
+      whileInView="visible"
+      viewport={viewportOnce}
+      variants={staggerContainer}
+      className="flex w-full flex-col gap-2 min-[880px]:pt-16"
+    >
+      <motion.h2
+        variants={revealUp}
+        className="text-center font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
       >
-        <motion.span
-          variants={revealUp}
-          className="inline-flex items-center gap-2 text-sb-accent-hot"
-        >
-          <Compass aria-hidden className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-            How a chain works
-          </span>
-        </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-        >
-          Five steps from question to conversation
-        </motion.h2>
-      </motion.div>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="flex list-none flex-col gap-6 p-0"
-      >
-        {RULES.map((r) => (
-          <motion.li key={r.number} variants={revealUp} className="flex items-start gap-5">
-            <span className="font-display text-3xl font-semibold leading-none text-sb-accent min-[880px]:text-4xl">
-              {r.number}
-            </span>
-            <div className="flex flex-col gap-1">
-              <p className="font-display text-[1.05rem] font-medium leading-tight text-sb-navy min-[880px]:text-[1.15rem]">
-                {r.headline}
-              </p>
-              <p className="text-[0.95rem] leading-[1.6] text-sb-text-muted">{r.body}</p>
+        How an Endorsement Works.
+      </motion.h2>
+
+      {reduce ? (
+        <ol role="list" className="flex list-none flex-col gap-6 p-0">
+          {RULES.map((r) => (
+            <li key={r.number} className="flex items-start gap-5">
+              <span className="font-display text-3xl font-semibold leading-none text-sb-accent min-[880px]:text-4xl">
+                {r.number}
+              </span>
+              <div className="flex flex-col gap-1">
+                <p className="font-display text-[1.05rem] font-medium leading-tight text-sb-navy min-[880px]:text-[1.15rem]">
+                  {r.headline}
+                </p>
+                <p className="text-[0.95rem] leading-[1.6] text-sb-text-muted">{r.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <motion.div variants={revealUp} className="flex flex-col gap-1.5">
+          <div
+            className="relative"
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="How an endorsement works"
+          >
+            <NetworkBloom />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                  aria-live="polite"
+                  aria-roledescription="slide"
+                  aria-label={`Step ${activeIndex + 1} of ${RULES.length}`}
+                  className="flex max-w-sm flex-col gap-3 p-5 min-[880px]:p-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-sb-white ring-1 ring-sb-cream-warm shadow-[0_2px_8px_rgba(8,31,52,0.05)]">
+                      <span className="font-display text-xl font-semibold leading-none text-sb-accent">
+                        {active.number}
+                      </span>
+                    </span>
+                    <p className="flex-1 font-display text-base font-medium leading-tight text-sb-navy">
+                      {active.headline}
+                    </p>
+                  </div>
+                  <p className="pl-4 text-sm leading-[1.55] text-sb-text-muted">
+                    {active.body}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </motion.li>
-        ))}
-      </motion.ul>
-    </section>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={() =>
+                setActiveIndex((i) => (i - 1 + RULES.length) % RULES.length)
+              }
+              aria-label="Previous step"
+              className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+            >
+              <ChevronLeft aria-hidden className="size-4" />
+            </button>
+            <div className="flex items-center gap-2">
+              {RULES.map((r, i) => (
+                <button
+                  key={r.number}
+                  type="button"
+                  onClick={() => setActiveIndex(i)}
+                  aria-label={`Show step ${i + 1}: ${r.headline}`}
+                  aria-current={i === activeIndex ? 'true' : undefined}
+                  className={cn(
+                    'rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                    i === activeIndex
+                      ? 'size-2.5 bg-sb-accent-hot'
+                      : 'size-2 bg-sb-cream-warm hover:bg-sb-cream',
+                  )}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveIndex((i) => (i + 1) % RULES.length)}
+              aria-label="Next step"
+              className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+            >
+              <ChevronRight aria-hidden className="size-4" />
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      <p className="mx-auto mt-4 max-w-[58ch] text-center text-sm italic leading-[1.6] text-sb-text-muted">
+        Endorsements close through warm introductions, not cold messages. Names appear only when
+        the destination accepts the conversation.
+      </p>
+    </motion.div>
   );
 }
+
+const QUEST_CARD_WIDTH_PCT = 60;
+const QUEST_INACTIVE_SCALE = 0.95;
 
 function BaconQuests({ reduce }: { reduce: ReduceMotion }) {
+  const rolodexRef = React.useRef<HTMLDivElement | null>(null);
+  const inView = useInView(rolodexRef, { once: true, amount: 0.3 });
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduce || !inView) return;
+    const id = window.setInterval(
+      () => setActiveIndex((i) => (i + 1) % QUESTS.length),
+      QUEST_DURATION_MS,
+    );
+    return () => window.clearInterval(id);
+  }, [reduce, inView, activeIndex]);
+
   return (
-    <section id="bacon-quests" className="mx-auto w-full max-w-5xl">
+    <section
+      id="bacon-quests"
+      className="mx-auto w-full max-w-5xl scroll-mt-24 min-[880px]:scroll-mt-28"
+    >
       <motion.div
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
@@ -301,20 +371,132 @@ function BaconQuests({ reduce }: { reduce: ReduceMotion }) {
       <p className="mb-6 mt-2 text-sm leading-[1.6] text-sb-text-muted">
         Open, in motion, and closed — we publish every outcome, including the declines.
       </p>
-      <motion.ul
-        role="list"
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:grid-cols-2 min-[880px]:gap-8"
-      >
-        {QUESTS.map((q) => (
-          <motion.li key={q.description} variants={revealUp}>
-            <QuestCard {...q} />
-          </motion.li>
-        ))}
-      </motion.ul>
+
+      {reduce ? (
+        <ul
+          role="list"
+          className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:grid-cols-2 min-[880px]:gap-8"
+        >
+          {QUESTS.map((q) => (
+            <li key={q.description}>
+              <QuestCard {...q} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          <ul
+            role="list"
+            className="grid list-none grid-cols-1 gap-6 p-0 min-[880px]:hidden"
+          >
+            {QUESTS.map((q) => (
+              <li key={q.description}>
+                <QuestCard {...q} />
+              </li>
+            ))}
+          </ul>
+
+          <div ref={rolodexRef} className="hidden min-[880px]:block">
+            <div
+              className="relative h-[24rem]"
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Quests"
+            >
+              {QUESTS.map((q, i) => {
+                const isActive = i === activeIndex;
+                const stepPct =
+                  (100 - QUEST_CARD_WIDTH_PCT) / (QUESTS.length - 1);
+                const leftPct = i * stepPct;
+                const z = isActive
+                  ? 100
+                  : i < activeIndex
+                    ? i + 1
+                    : QUESTS.length - i;
+                return (
+                  <motion.div
+                    key={q.description}
+                    initial={false}
+                    animate={{
+                      scale: isActive ? 1 : QUEST_INACTIVE_SCALE,
+                      zIndex: z,
+                    }}
+                    transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: `${leftPct}%`,
+                      width: `${QUEST_CARD_WIDTH_PCT}%`,
+                      transformOrigin: 'center',
+                    }}
+                    onClick={() => setActiveIndex(i)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveIndex(i);
+                      }
+                    }}
+                    role={isActive ? undefined : 'button'}
+                    tabIndex={isActive ? -1 : 0}
+                    aria-label={
+                      isActive ? undefined : `Show quest: ${q.description}`
+                    }
+                    aria-current={isActive ? 'true' : undefined}
+                    className={cn(
+                      'rounded-3xl',
+                      !isActive &&
+                        'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                    )}
+                  >
+                    <QuestCard {...q} />
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveIndex((i) => (i - 1 + QUESTS.length) % QUESTS.length)}
+                aria-label="Previous quest"
+                className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+              >
+                <ChevronLeft aria-hidden className="size-4" />
+              </button>
+              <div className="flex items-center gap-2">
+                {QUESTS.map((q, i) => (
+                  <button
+                    key={q.description}
+                    type="button"
+                    onClick={() => setActiveIndex(i)}
+                    aria-label={`Show quest ${i + 1}: ${q.description}`}
+                    aria-current={i === activeIndex ? 'true' : undefined}
+                    className={cn(
+                      'rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                      i === activeIndex
+                        ? 'size-2.5 bg-sb-accent-hot'
+                        : 'size-2 bg-sb-cream-warm hover:bg-sb-cream',
+                    )}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveIndex((i) => (i + 1) % QUESTS.length)}
+                aria-label="Next quest"
+                className="inline-flex size-9 items-center justify-center rounded-full bg-sb-cream-warm text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+              >
+                <ChevronRight aria-hidden className="size-4" />
+              </button>
+            </div>
+
+            <p className="mt-3 text-center text-xs text-sb-text-muted">
+              {activeIndex + 1} of {QUESTS.length}
+            </p>
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -342,7 +524,7 @@ function BaconLeaderboardSection({ reduce }: { reduce: ReduceMotion }) {
           variants={revealUp}
           className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
         >
-          The leaderboard
+          The Bacon Factor
         </motion.h2>
       </motion.div>
       <Leaderboard />
@@ -352,25 +534,17 @@ function BaconLeaderboardSection({ reduce }: { reduce: ReduceMotion }) {
 
 function BaconConduct({ reduce }: { reduce: ReduceMotion }) {
   return (
-    <section className="mx-auto w-full max-w-3xl">
-      <motion.blockquote
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={revealUp}
-        className="max-w-[62ch] border-l-4 border-sb-accent pl-5 text-base italic leading-[1.6] text-sb-text"
-      >
-        Bacon Board has firm rules. Quest destinations are described, not named, on the public
-        board — their identity propagates only down the chain, only to the forwarders who need
-        it. Chains never reach the destination directly; the closing forwarder, who knows them,
-        makes a single warm introduction on our behalf. Even if multiple chains converge, we
-        serialise — one introduction, not five. If a destination declines, the chain ends
-        quietly and no new chain is ever started toward them. Each person can be a Quest exactly
-        once. Connector names are displayed only with consent — opt anonymous and only SBA knows
-        it&rsquo;s you. We will close any chain that crosses these lines, and we will remove any
-        connector who tries.
-      </motion.blockquote>
-    </section>
+    <Caveat reduce={reduce}>
+      Bacon Board has firm rules. Quest destinations are described, not named, on the public
+      board — their identity propagates only down the endorsement, only to the forwarders who
+      need it. Endorsements never reach the destination directly; the closing forwarder, who
+      knows them, makes a single warm introduction on our behalf. Even if multiple endorsements
+      converge, we serialise — one introduction, not five. If a destination declines, the
+      endorsement ends quietly and no new endorsement is ever started toward them. Each person
+      can be a Quest exactly once. Connector names are displayed only with consent — opt
+      anonymous and only SBA knows it&rsquo;s you. We will close any endorsement that crosses
+      these lines, and we will remove any connector who tries.
+    </Caveat>
   );
 }
 
@@ -434,9 +608,9 @@ function BaconContribute({ reduce }: { reduce: ReduceMotion }) {
             variants={revealUp}
             className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-cream/90"
           >
-            Bacon Board is open source from the first commit. We need backend engineers (chain
-            logic, anti-abuse, the serialised-introduction queue), product designers (the
-            invitation and consent flows are the hardest UX work on this project), and
+            Bacon Board is open source from the first commit. We need backend engineers
+            (endorsement logic, anti-abuse, the serialised-introduction queue), product designers
+            (the invitation and consent flows are the hardest UX work on this project), and
             researchers (effective network reach in small countries is a real question). The
             repo is at zero — early contributors shape what this becomes.
           </motion.p>

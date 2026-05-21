@@ -6,7 +6,7 @@ export interface QuestCardProps {
   readonly status: QuestStatus;
   readonly description: string;
   readonly reason: string;
-  readonly chainsInMotion: number;
+  readonly endorsementsInMotion: number;
   readonly bestBaconNumber: number | null;
   readonly daysOpen: number;
   readonly outcome?: string;
@@ -35,7 +35,7 @@ export function QuestCard({
   status,
   description,
   reason,
-  chainsInMotion,
+  endorsementsInMotion,
   bestBaconNumber,
   daysOpen,
   outcome,
@@ -65,7 +65,7 @@ export function QuestCard({
           <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-sb-text-muted">
             <div className="inline-flex items-center gap-1.5">
               <Network aria-hidden className="size-3.5" />
-              {chainsInMotion} chains
+              {endorsementsInMotion} endorsements
             </div>
             {bestBaconNumber !== null && (
               <div className="inline-flex items-center gap-1.5">
@@ -83,7 +83,7 @@ export function QuestCard({
         <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-sb-text-muted">
           <div className="inline-flex items-center gap-1.5">
             <Network aria-hidden className="size-4" />
-            {chainsInMotion} in motion
+            {endorsementsInMotion} in motion
           </div>
           <div className="inline-flex items-center gap-1.5">
             <Hash aria-hidden className="size-4" />
@@ -103,7 +103,7 @@ export function QuestCard({
             title="Game launching soon — subscribe to be notified."
             className="inline-flex w-fit items-center gap-2 rounded-full bg-sb-cream-warm px-4 py-2 text-sm font-medium text-sb-text-muted disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Start a chain
+            Start an endorsement
           </button>
         )}
         <p className="text-xs italic text-sb-text-muted">{isMockNote}</p>
