@@ -14,6 +14,7 @@ import {
   GitBranch,
   Globe,
   Network,
+  Receipt,
   Scale,
   Sparkles,
   Users,
@@ -65,6 +66,14 @@ const ARTEFACTS: readonly ArtefactRow[] = [
     body: 'This site, including every page you’re reading, is open source.',
     href: WEBSITE_REPO_URL,
     linkLabel: 'Open repository',
+  },
+  {
+    kind: 'internal',
+    icon: Receipt,
+    label: 'The financial ledger.',
+    body: 'Every transaction in, every transaction out — a versioned public ledger updated weekly. Beyond what the AEC requires.',
+    route: '/financials',
+    linkLabel: 'See the Financials page',
   },
   {
     kind: 'internal',

@@ -132,6 +132,7 @@ export function Financials() {
       <FinancialsBreakdown reduce={reduce} agg={agg} />
       <FinancialsArchitecture reduce={reduce} />
       <FinancialsCaveat reduce={reduce} />
+      <ArchitectureRepoPill reduce={reduce} />
       <FinancialsCta reduce={reduce} />
     </div>
   );
@@ -458,14 +459,13 @@ function FinancialsArchitecture({ reduce }: { reduce: ReduceMotion }) {
           </li>
         ))}
       </ul>
-      <p className="mb-8 max-w-[64ch] text-[1.05rem] leading-[1.6] text-sb-text">
+      <p className="max-w-[64ch] text-[1.05rem] leading-[1.6] text-sb-text">
         Donations and expenses flow through our bank and Stripe. Transactions are reconciled
         in Xero (a standard accounting tool). Every week, a categorised export is written to
         a public GitHub repository &mdash; aec-financials &mdash; as a versioned ledger. This
         page reads from that repo. The commit history of the repo IS the audit trail: every
         correction, every reclassification, every late entry is visible in git blame.
       </p>
-      <ArchitectureRepoPill reduce={reduce} />
     </section>
   );
 }
@@ -496,13 +496,14 @@ function ArchitectureRepoPill({ reduce }: { reduce: ReduceMotion }) {
   }
 
   return (
-    <motion.div
+    <motion.section
       initial={reduce ? false : 'hidden'}
       whileInView="visible"
       viewport={viewportOnce}
       variants={staggerContainer}
-      className="relative overflow-hidden rounded-3xl bg-sb-navy p-6 text-sb-cream shadow-[0_18px_40px_rgba(8,31,52,0.18)] ring-1 ring-sb-navy min-[880px]:p-10"
+      className="mx-auto w-full max-w-5xl"
     >
+      <div className="relative overflow-hidden rounded-3xl bg-sb-navy p-6 text-sb-cream shadow-[0_18px_40px_rgba(8,31,52,0.18)] ring-1 ring-sb-navy min-[880px]:p-10">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-sb-accent/15 mix-blend-soft-light blur-3xl"
@@ -561,7 +562,8 @@ function ArchitectureRepoPill({ reduce }: { reduce: ReduceMotion }) {
           </Button>
         </motion.div>
       </div>
-    </motion.div>
+      </div>
+    </motion.section>
   );
 }
 
