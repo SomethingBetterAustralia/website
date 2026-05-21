@@ -181,7 +181,7 @@ function OpenHero({ reduce }: { reduce: ReduceMotion }) {
         variants={revealUp}
         className="font-display text-[clamp(2.8rem,6.5vw,4.6rem)] font-medium italic leading-[1.02] tracking-[-0.05em] text-sb-accent"
       >
-        Open.
+        We&rsquo;re Open.
       </motion.h1>
       <motion.blockquote
         variants={revealUp}
