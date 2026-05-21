@@ -1,4 +1,4 @@
-import { Handshake, Microscope, ShieldCheck, Telescope } from 'lucide-react';
+import { Handshake, Microscope, Scale, ShieldCheck, Telescope } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
@@ -27,27 +27,30 @@ export function KeyPrinciples() {
     <section className="bg-sb-cream-warm/40 px-6 py-20 min-[880px]:px-12">
       <div className="mx-auto max-w-5xl">
         <motion.div
-          className="flex flex-col gap-3"
+          className="mb-10 flex flex-col gap-2"
           initial={reduce ? false : 'hidden'}
           whileInView="visible"
           viewport={viewportOnce}
           variants={staggerContainer}
         >
+          <motion.span
+            variants={revealUp}
+            className="inline-flex items-center gap-2 text-sb-accent-hot"
+          >
+            <Scale aria-hidden className="size-4" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+              Key principles
+            </span>
+          </motion.span>
           <motion.h2
             variants={revealUp}
-            className="font-display text-[clamp(2.4rem,5vw,3.6rem)] font-medium italic leading-[1.05] tracking-[-0.05em] text-sb-accent"
+            className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
           >
-            Key Principles
+            How we&rsquo;re different.
           </motion.h2>
-          <motion.h3
-            variants={revealUp}
-            className="font-display text-[clamp(1.5rem,3vw,2.2rem)] font-medium leading-[1.15] tracking-[-0.04em] text-sb-navy"
-          >
-            How we are different
-          </motion.h3>
         </motion.div>
         <motion.ul
-          className="mt-10 grid list-none grid-cols-1 gap-4 p-0 min-[880px]:grid-cols-2"
+          className="grid list-none grid-cols-1 gap-4 p-0 min-[880px]:grid-cols-2"
           initial={reduce ? false : 'hidden'}
           whileInView="visible"
           viewport={viewportOnce}

@@ -1,4 +1,4 @@
-import { CalendarRange, Hammer, Lightbulb, Sunrise } from 'lucide-react';
+import { CalendarRange, Compass, Hammer, Lightbulb, Sunrise } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
@@ -56,12 +56,23 @@ export function Vision() {
   return (
     <section className="px-6 py-16 min-[880px]:px-12 min-[880px]:py-20">
       <motion.div
-        className="mx-auto grid max-w-4xl gap-4"
+        className="mx-auto flex max-w-4xl flex-col gap-4"
         initial={reduce ? false : 'hidden'}
         whileInView="visible"
         viewport={viewportOnce}
         variants={staggerContainer}
       >
+        <motion.div variants={revealUp} className="mb-4 flex flex-col gap-2">
+          <span className="inline-flex items-center gap-2 text-sb-accent-hot">
+            <Compass aria-hidden className="size-4" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+              Why we exist
+            </span>
+          </span>
+          <h2 className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy">
+            What we&rsquo;re building toward.
+          </h2>
+        </motion.div>
         {VISIONS.map((v, i) => {
           const Icon = v.icon;
           return (
