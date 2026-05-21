@@ -1,0 +1,30 @@
+import {
+  Briefcase,
+  Coins,
+  GraduationCap,
+  Heart,
+  HeartPulse,
+  Home,
+  Landmark,
+  Leaf,
+  Mountain,
+  Plane,
+  Scale,
+  Shield,
+  type LucideIcon,
+} from 'lucide-react';
+
+export const DOMAIN_ICONS: Readonly<Record<string, LucideIcon>> = {
+  'economy-tax': Coins,
+  'climate-energy': Leaf,
+  'immigration-population': Plane,
+  'healthcare-aged-care': HeartPulse,
+  'education-skills': GraduationCap,
+  'housing-urban': Home,
+  'industrial-relations': Briefcase,
+  'indigenous-affairs': Mountain,
+  'defence-foreign': Shield,
+  'law-order': Scale,
+  'social-cultural': Heart,
+  'governance-federation': Landmark,
+};

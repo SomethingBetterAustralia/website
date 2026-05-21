@@ -1,16 +1,18 @@
-import { AlertTriangle, ClipboardList, RotateCw, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Bell, ClipboardList, RotateCw, Users, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 import type { DomainScore, MemberProfile, PeopleResponse } from '@backend/types/people';
 import type { SurveyDefinitionResponse, SurveyDomain } from '@backend/types/survey';
 import { Button } from '@/components/ui/button';
 import {
+  DOMAIN_ICONS,
   DomainSpectra,
   LeaningsScatter,
   expertiseToOpacity,
   type ScatterPoint,
 } from '@/components/people';
 import { usePeoplePage, type PeoplePageState } from '@/hooks/usePeoplePage';
+import { Caveat } from '@/components/prose';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -49,6 +51,7 @@ function domainScoreToPoint(
     economicAxis: ds.economicComponent ?? 0,
     socialAxis: ds.socialComponent ?? 0,
     opacity: expertiseToOpacity(ds.expertise),
+    icon: DOMAIN_ICONS[ds.domainId],
   };
 }
 
@@ -58,8 +61,15 @@ export function People() {
   return (
     <div className="flex flex-col gap-16 px-6 pb-24 pt-6 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-10">
       <PeopleBand state={state} retry={retry} reduce={reduce} />
+      <Caveat reduce={reduce}>
+        Axes are derived from the twelve policy domains in the Leadership Leanings Survey,
+        aggregated by the economic and social mapping recorded against each item in the
+        survey definition. Member profiles are placeholders until enough real submissions
+        exist; the visible spread demonstrates how the chart will look once the team has
+        filled it in.
+      </Caveat>
       <SurveyCta reduce={reduce} />
-      <Methodology reduce={reduce} />
+      <PeopleFinalCta reduce={reduce} />
     </div>
   );
 }
@@ -241,8 +251,34 @@ function Visualisation({
     <>
       <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
         <PeopleHeader reduce={reduce} />
-        <div className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:p-8">
-          <Toggle current={toggle} counts={counts} onChange={handleToggleChange} reduce={reduce} />
+        <div className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:mt-9 min-[880px]:p-8">
+          <div className="flex min-h-[2.75rem] items-center">
+            {domainMode && selectedMember ? (
+              <div className="flex w-full items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(undefined)}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sb-cream-warm px-3 py-1.5 text-sm font-medium text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+                >
+                  <ArrowLeft aria-hidden className="size-4" />
+                  All members
+                </button>
+                <div className="min-w-0 text-right">
+                  <p className="truncate font-display text-sm font-medium text-sb-navy">
+                    {selectedMember.name}
+                  </p>
+                  <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
+                </div>
+              </div>
+            ) : (
+              <Toggle
+                current={toggle}
+                counts={counts}
+                onChange={handleToggleChange}
+                reduce={reduce}
+              />
+            )}
+          </div>
           <div className="mt-6">
             <LeaningsScatter
               points={points}
@@ -373,65 +409,105 @@ function MemberDetail({
 
 function SurveyCta({ reduce }: { reduce: boolean }) {
   return (
-    <section className="mx-auto w-full max-w-5xl">
-      <motion.div
-        initial={reduce ? false : 'hidden'}
-        whileInView="visible"
-        viewport={viewportOnce}
-        variants={staggerContainer}
-        className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:p-10"
-      >
-        <motion.span
-          variants={revealUp}
-          className="inline-flex items-center gap-2 text-sb-accent-hot"
-        >
-          <ClipboardList aria-hidden className="size-4" />
-          <span className="text-xs font-semibold uppercase tracking-[0.22em]">Add your dot</span>
-        </motion.span>
-        <motion.h2
-          variants={revealUp}
-          className="mt-3 font-display text-[clamp(1.7rem,3vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.04em] text-sb-navy"
-        >
-          Where do you sit?
-        </motion.h2>
-        <motion.p
-          variants={revealUp}
-          className="mt-3 max-w-[52ch] text-[1.05rem] leading-[1.6] text-sb-text"
-        >
-          Take the 15-minute survey. We'll plot you anonymously alongside the team, and you'll see
-          the diversity is real.
-        </motion.p>
-        <motion.div variants={revealUp} className="mt-6">
-          <Button
-            asChild
-            className="rounded-full bg-sb-accent text-sb-white shadow-[0_4px_12px_rgba(212,166,73,0.35)] hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
-          >
-            <Link to="/survey">Take the survey</Link>
-          </Button>
-        </motion.div>
-      </motion.div>
-    </section>
-  );
-}
-
-function Methodology({ reduce }: { reduce: boolean }) {
-  return (
     <motion.section
       initial={reduce ? false : 'hidden'}
       whileInView="visible"
       viewport={viewportOnce}
       variants={staggerContainer}
-      className="mx-auto w-full max-w-3xl"
+      className="mx-auto w-full max-w-5xl"
     >
-      <motion.p variants={revealUp} className="text-xs leading-[1.7] text-sb-text-muted">
-        Axes are derived from the twelve policy domains in the Leadership Leanings Survey,
-        aggregated by the economic and social mapping recorded against each item in the survey
-        definition.
-      </motion.p>
-      <motion.p variants={revealUp} className="mt-3 text-xs leading-[1.7] text-sb-text-muted">
-        Member profiles are placeholders until enough real submissions exist. The visible spread
-        demonstrates how the chart will look once the team has filled it in.
-      </motion.p>
+      <div className="relative overflow-hidden rounded-3xl bg-sb-navy p-6 text-sb-cream shadow-[0_18px_40px_rgba(8,31,52,0.18)] ring-1 ring-sb-navy min-[880px]:p-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-sb-accent/15 mix-blend-soft-light blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-16 size-64 rounded-full bg-sb-accent-hot/15 mix-blend-soft-light blur-3xl"
+        />
+        <div className="relative flex flex-col gap-5">
+          <motion.span
+            variants={revealUp}
+            className="inline-flex items-center gap-2 text-sb-accent"
+          >
+            <ClipboardList aria-hidden className="size-4" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+              Add your dot
+            </span>
+          </motion.span>
+          <motion.h2
+            variants={revealUp}
+            className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-medium italic leading-[1.1] tracking-[-0.04em] text-sb-accent"
+          >
+            Where do you sit?
+          </motion.h2>
+          <motion.p
+            variants={revealUp}
+            className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-cream/90"
+          >
+            Take the 15-minute survey. We&rsquo;ll plot you anonymously alongside the team,
+            and you&rsquo;ll see the diversity is real.
+          </motion.p>
+          <motion.div variants={revealUp}>
+            <Button
+              asChild
+              className="rounded-full bg-sb-accent text-sb-navy hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
+            >
+              <Link to="/survey">
+                <ClipboardList aria-hidden className="size-4" />
+                Take the survey
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </div>
     </motion.section>
+  );
+}
+
+function PeopleFinalCta({ reduce }: { reduce: boolean }) {
+  return (
+    <section className="mx-auto w-full max-w-3xl text-center">
+      <motion.div
+        initial={reduce ? false : 'hidden'}
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={staggerContainer}
+        className="flex flex-col items-center gap-4"
+      >
+        <motion.span
+          variants={revealUp}
+          className="inline-flex items-center gap-2 text-sb-accent-hot"
+        >
+          <Bell aria-hidden className="size-4" />
+          <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+            Stay in the loop
+          </span>
+        </motion.span>
+        <motion.h2
+          variants={revealUp}
+          className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
+        >
+          Become a member.
+        </motion.h2>
+        <motion.p
+          variants={revealUp}
+          className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-text"
+        >
+          If you can make the next number larger, please join us.
+        </motion.p>
+        <motion.div variants={revealUp}>
+          <Button
+            asChild
+            className="rounded-full bg-sb-navy text-sb-cream hover:bg-sb-navy-hot focus-visible:ring-sb-accent"
+          >
+            <Link to="/">
+              <Bell aria-hidden className="size-4" />
+              Become a member
+            </Link>
+          </Button>
+        </motion.div>
+      </motion.div>
+    </section>
   );
 }

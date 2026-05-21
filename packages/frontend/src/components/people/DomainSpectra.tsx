@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'motion/react';
 import type { MemberProfile } from '@backend/types/people';
 import type { SurveyDomain } from '@backend/types/survey';
+import { DOMAIN_ICONS } from './domain-icons';
 import { expertiseToOpacity, scoreToNormalised } from './leanings-math';
 
 export interface DomainSpectraProps {
@@ -40,9 +41,21 @@ export function DomainSpectra({ member, domains }: DomainSpectraProps) {
             key={domain.id}
             className="grid grid-cols-1 gap-2 min-[880px]:grid-cols-[2fr_3fr] min-[880px]:items-center min-[880px]:gap-4"
           >
-            <div>
-              <div className="font-display text-sm font-medium text-sb-navy">{domain.name}</div>
-              <div className="text-xs text-sb-text-muted">{domain.blurb}</div>
+            <div className="flex items-start gap-2.5">
+              {(() => {
+                const Icon = DOMAIN_ICONS[domain.id];
+                return Icon ? (
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sb-accent/10">
+                    <Icon className="size-3.5 text-sb-accent-hot" aria-hidden />
+                  </span>
+                ) : null;
+              })()}
+              <div>
+                <div className="font-display text-sm font-medium text-sb-navy">
+                  {domain.name}
+                </div>
+                <div className="text-xs text-sb-text-muted">{domain.blurb}</div>
+              </div>
             </div>
             <div className="flex flex-col gap-1">
               <span className="sr-only">{readout}</span>

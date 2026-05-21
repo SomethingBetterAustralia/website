@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 import { scoreToNormalised } from './leanings-math';
@@ -9,6 +10,7 @@ export interface ScatterPoint {
   readonly economicAxis: number;
   readonly socialAxis: number;
   readonly opacity: number;
+  readonly icon?: LucideIcon;
 }
 
 export interface LeaningsScatterProps {
@@ -66,6 +68,7 @@ function ScatterDot({ point, selected, onSelect, reduceMotion }: ScatterDotProps
   const [hover, setHover] = React.useState(false);
   const { cx, cy } = pointToPosition(point);
   const clickable = Boolean(onSelect);
+  const Icon = point.icon;
   return (
     <g>
       <g transform={`translate(${cx} ${cy})`}>
@@ -88,10 +91,32 @@ function ScatterDot({ point, selected, onSelect, reduceMotion }: ScatterDotProps
           }
           tabIndex={clickable ? 0 : undefined}
           role={clickable ? 'button' : undefined}
-          aria-label={clickable ? `${point.label}, ${point.sublabel}` : undefined}
+          aria-label={clickable ? `${point.label}, ${point.sublabel}` : point.label}
           className={clickable ? 'cursor-pointer focus-visible:outline-none' : undefined}
+          style={Icon ? { opacity: point.opacity } : undefined}
         >
-          {selected ? (
+          {Icon ? (
+            <>
+              <circle
+                cx={0}
+                cy={0}
+                r={11}
+                strokeWidth={1.5}
+                className="fill-sb-white stroke-sb-accent-hot"
+              />
+              <foreignObject
+                x={-7}
+                y={-7}
+                width={14}
+                height={14}
+                pointerEvents="none"
+              >
+                <div className="flex size-3.5 items-center justify-center">
+                  <Icon className="size-3.5 text-sb-accent-hot" aria-hidden />
+                </div>
+              </foreignObject>
+            </>
+          ) : selected ? (
             <circle cx={0} cy={0} r={8} strokeWidth={2} className="fill-sb-accent stroke-sb-navy" />
           ) : (
             <circle cx={0} cy={0} r={6} fillOpacity={point.opacity} className="fill-sb-navy" />

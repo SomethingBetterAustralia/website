@@ -10,3 +10,4 @@ export {
   polygonVertices,
   scoreToNormalised,
 } from './leanings-math';
+export { DOMAIN_ICONS } from './domain-icons';
