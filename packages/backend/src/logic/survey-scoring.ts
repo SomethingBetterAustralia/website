@@ -39,6 +39,7 @@ export function scoreDomain(
     expertise: responses.expertise,
     economicComponent: axes.economic,
     socialComponent: axes.social,
+    responses: responses.responses,
   };
 }
 

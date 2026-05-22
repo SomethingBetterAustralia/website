@@ -205,9 +205,9 @@ function generateMember(
 
   const domainScores: DomainScore[] = [];
   for (const domain of SURVEY_DEFINITION.domains) {
-    const responses = domains[domain.id];
-    if (!responses) continue;
-    const score = scoreDomain(domain, responses);
+    const submission = domains[domain.id];
+    if (!submission) continue;
+    const score = scoreDomain(domain, submission);
     if (score !== null) domainScores.push(score);
   }
 

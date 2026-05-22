@@ -1,4 +1,4 @@
-import type { ExpertiseLevel } from './survey.js';
+import type { ExpertiseLevel, LikertResponse } from './survey.js';
 
 export interface DomainScore {
   readonly domainId: string;
@@ -6,6 +6,7 @@ export interface DomainScore {
   readonly expertise: ExpertiseLevel;
   readonly economicComponent: number | null;
   readonly socialComponent: number | null;
+  readonly responses: Record<string, LikertResponse>;
 }
 
 export interface MemberProfile {
