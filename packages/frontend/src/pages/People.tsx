@@ -36,6 +36,7 @@ function memberToPoint(member: MemberProfile): ScatterPoint {
     economicAxis: member.economicAxis,
     socialAxis: member.socialAxis,
     opacity: expertiseToOpacity(meanExpertise(member)),
+    leadership: member.isLeadership,
   };
 }
 
@@ -196,6 +197,7 @@ function Visualisation({
 }) {
   const [toggle, setToggle] = React.useState<ToggleKey>('leadership');
   const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
+  const [selectedDomainId, setSelectedDomainId] = React.useState<string | undefined>(undefined);
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
   const counts = React.useMemo(() => {
@@ -218,8 +220,21 @@ function Visualisation({
     [selectedId, members],
   );
 
+  const selectedDomain = React.useMemo(
+    () => (selectedDomainId ? domains.find((d) => d.id === selectedDomainId) : undefined),
+    [selectedDomainId, domains],
+  );
+
   const domainMode = Boolean(selectedMember);
   const points = React.useMemo<ScatterPoint[]>(() => {
+    if (selectedMember && selectedDomain) {
+      const ds = selectedMember.domainScores.find(
+        (d) => d.domainId === selectedDomain.id,
+      );
+      if (!ds) return [];
+      const p = domainScoreToPoint(ds, selectedDomain);
+      return p ? [p] : [];
+    }
     if (selectedMember) {
       const byId = new Map(domains.map((d) => [d.id, d]));
       const out: ScatterPoint[] = [];
@@ -229,8 +244,32 @@ function Visualisation({
       }
       return out;
     }
-    return filtered.map(memberToPoint);
-  }, [selectedMember, domains, filtered]);
+    if (selectedDomain) {
+      const out: ScatterPoint[] = [];
+      const ordered = [...filtered].sort(
+        (a, b) => Number(a.isLeadership) - Number(b.isLeadership),
+      );
+      for (const member of ordered) {
+        const ds = member.domainScores.find((d) => d.domainId === selectedDomain.id);
+        if (!ds) continue;
+        if (ds.economicComponent === null && ds.socialComponent === null) continue;
+        out.push({
+          id: member.id,
+          label: member.name,
+          sublabel: `Score ${Math.round(ds.score)} · Expertise ${ds.expertise}/5`,
+          economicAxis: ds.economicComponent ?? 0,
+          socialAxis: ds.socialComponent ?? 0,
+          opacity: expertiseToOpacity(ds.expertise),
+          leadership: member.isLeadership,
+        });
+      }
+      return out;
+    }
+    const ordered = [...filtered].sort(
+      (a, b) => Number(a.isLeadership) - Number(b.isLeadership),
+    );
+    return ordered.map(memberToPoint);
+  }, [selectedMember, selectedDomain, domains, filtered]);
 
   function handleSelectMember(id: string) {
     setSelectedId(id);
@@ -245,6 +284,10 @@ function Visualisation({
   function handleToggleChange(next: ToggleKey) {
     setToggle(next);
     setSelectedId(undefined);
+  }
+
+  function handleToggleDomain(id: string) {
+    setSelectedDomainId((cur) => (cur === id ? undefined : id));
   }
 
   return (
@@ -263,22 +306,102 @@ function Visualisation({
                   <ArrowLeft aria-hidden className="size-4" />
                   All members
                 </button>
-                <div className="min-w-0 text-right">
-                  <p className="truncate font-display text-sm font-medium text-sb-navy">
-                    {selectedMember.name}
-                  </p>
-                  <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="min-w-0 text-right">
+                    <p className="truncate font-display text-sm font-medium text-sb-navy">
+                      {selectedMember.name}
+                    </p>
+                    <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
+                  </div>
+                  {selectedDomain &&
+                    (() => {
+                      const Icon = DOMAIN_ICONS[selectedDomain.id];
+                      if (!Icon) return null;
+                      return (
+                        <div className="relative">
+                          <span
+                            aria-label={selectedDomain.name}
+                            className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-navy"
+                          >
+                            <Icon aria-hidden className="size-4" />
+                          </span>
+                          <span
+                            role="tooltip"
+                            className="pointer-events-none absolute right-0 top-full z-10 mt-1 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100"
+                          >
+                            {selectedDomain.name}
+                          </span>
+                        </div>
+                      );
+                    })()}
                 </div>
               </div>
             ) : (
-              <Toggle
-                current={toggle}
-                counts={counts}
-                onChange={handleToggleChange}
-                reduce={reduce}
-              />
+              <div className="flex w-full items-center justify-between gap-3">
+                <Toggle
+                  current={toggle}
+                  counts={counts}
+                  onChange={handleToggleChange}
+                  reduce={reduce}
+                />
+                {selectedDomain &&
+                  (() => {
+                    const Icon = DOMAIN_ICONS[selectedDomain.id];
+                    if (!Icon) return null;
+                    return (
+                      <div className="relative">
+                        <span
+                          aria-label={selectedDomain.name}
+                          className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-navy"
+                        >
+                          <Icon aria-hidden className="size-4" />
+                        </span>
+                        <span
+                          role="tooltip"
+                          className="pointer-events-none absolute right-0 top-full z-10 mt-1 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100"
+                        >
+                          {selectedDomain.name}
+                        </span>
+                      </div>
+                    );
+                  })()}
+              </div>
             )}
           </div>
+          <ul
+            role="list"
+            className="mt-4 grid list-none grid-cols-6 gap-1.5 p-0 min-[880px]:grid-cols-12"
+          >
+            {domains.map((d) => {
+              const Icon = DOMAIN_ICONS[d.id];
+              if (!Icon) return null;
+              const isActive = selectedDomainId === d.id;
+              return (
+                <li key={d.id} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleDomain(d.id)}
+                    aria-label={`Filter by ${d.name}`}
+                    aria-pressed={isActive}
+                    className={cn(
+                      'peer inline-flex size-8 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                      isActive
+                        ? 'bg-sb-accent-hot text-sb-navy'
+                        : 'bg-sb-accent/10 text-sb-accent-hot hover:bg-sb-accent/20',
+                    )}
+                  >
+                    <Icon aria-hidden className="size-4" />
+                  </button>
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+                  >
+                    {d.name}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
           <div className="mt-6">
             <LeaningsScatter
               points={points}
@@ -286,12 +409,25 @@ function Visualisation({
               onSelectPoint={domainMode ? undefined : handleSelectMember}
             />
           </div>
-          {selectedMember ? (
+          {selectedMember && selectedDomain ? (
+            <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
+              <span className="font-medium text-sb-navy">{selectedMember.name}</span>&rsquo;s
+              position on{' '}
+              <span className="font-medium text-sb-navy">{selectedDomain.name}</span>. Tap the icon
+              again to see all their domains.
+            </p>
+          ) : selectedMember ? (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
               Each dot is one policy domain for{' '}
               <span className="font-medium text-sb-navy">{selectedMember.name}</span>. The spread
               across quadrants shows that a single person doesn&rsquo;t fit one party — they lean
               one way on some issues, another on others.
+            </p>
+          ) : selectedDomain ? (
+            <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
+              Each dot is a member&rsquo;s position on{' '}
+              <span className="font-medium text-sb-navy">{selectedDomain.name}</span>. Click a
+              member to drill into their full domain breakdown.
             </p>
           ) : (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">

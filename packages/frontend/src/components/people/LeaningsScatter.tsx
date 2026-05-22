@@ -11,6 +11,7 @@ export interface ScatterPoint {
   readonly socialAxis: number;
   readonly opacity: number;
   readonly icon?: LucideIcon;
+  readonly leadership?: boolean;
 }
 
 export interface LeaningsScatterProps {
@@ -119,7 +120,13 @@ function ScatterDot({ point, selected, onSelect, reduceMotion }: ScatterDotProps
           ) : selected ? (
             <circle cx={0} cy={0} r={8} strokeWidth={2} className="fill-sb-accent stroke-sb-navy" />
           ) : (
-            <circle cx={0} cy={0} r={6} fillOpacity={point.opacity} className="fill-sb-navy" />
+            <circle
+              cx={0}
+              cy={0}
+              r={6}
+              fillOpacity={point.opacity}
+              className={point.leadership ? 'fill-sb-navy' : 'fill-sb-accent-hot'}
+            />
           )}
         </motion.g>
       </g>
