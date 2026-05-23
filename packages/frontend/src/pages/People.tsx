@@ -581,7 +581,7 @@ function SurveyCta({ reduce }: { reduce: boolean }) {
             variants={revealUp}
             className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-cream/90"
           >
-            Take the 15-minute survey. We&rsquo;ll plot you anonymously alongside the team,
+            Take the 30-minute survey. We&rsquo;ll plot you anonymously alongside the team,
             and you&rsquo;ll see the diversity is real.
           </motion.p>
           <motion.div variants={revealUp}>
