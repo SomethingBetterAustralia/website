@@ -1,10 +1,10 @@
-import type { SurveyDomain } from '@backend/types/survey';
+import type { SurveyPortfolio } from '@backend/types/survey';
 
 export interface AboutYouStepProps {
   memberName: string;
   background: string;
   expertiseAreas: ReadonlySet<string>;
-  domains: readonly SurveyDomain[];
+  portfolios: readonly SurveyPortfolio[];
   onMemberNameChange: (next: string) => void;
   onBackgroundChange: (next: string) => void;
   onExpertiseAreasChange: (next: Set<string>) => void;
@@ -20,7 +20,7 @@ export function AboutYouStep({
   memberName,
   background,
   expertiseAreas,
-  domains,
+  portfolios,
   onMemberNameChange,
   onBackgroundChange,
   onExpertiseAreasChange,
@@ -60,24 +60,24 @@ export function AboutYouStep({
       </label>
       <fieldset className="m-0 flex flex-col gap-3 border-0 p-0">
         <legend className={fieldLabelClasses}>
-          Which policy domains do you feel strongest in?
+          Which policy portfolios do you feel strongest in?
           <span className={fieldReqClasses}>(optional, multi-select)</span>
         </legend>
         <div className="grid grid-cols-1 gap-2 min-[880px]:grid-cols-2">
-          {domains.map((domain) => {
-            const checked = expertiseAreas.has(domain.id);
+          {portfolios.map((portfolio) => {
+            const checked = expertiseAreas.has(portfolio.id);
             return (
               <label
-                key={domain.id}
+                key={portfolio.id}
                 className="flex cursor-pointer items-start gap-3 rounded-2xl bg-sb-cream-warm/50 px-3 py-2 transition-colors hover:bg-sb-cream-warm"
               >
                 <input
                   type="checkbox"
                   className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer accent-sb-navy"
                   checked={checked}
-                  onChange={(e) => toggleArea(domain.id, e.target.checked)}
+                  onChange={(e) => toggleArea(portfolio.id, e.target.checked)}
                 />
-                <span className="text-[0.95rem] leading-[1.4] text-sb-text">{domain.name}</span>
+                <span className="text-[0.95rem] leading-[1.4] text-sb-text">{portfolio.name}</span>
               </label>
             );
           })}

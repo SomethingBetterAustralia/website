@@ -8,7 +8,7 @@ export type PeoplePageState =
   | {
       kind: 'ready';
       members: PeopleResponse['members'];
-      domains: SurveyDefinitionResponse['definition']['domains'];
+      portfolios: SurveyDefinitionResponse['definition']['portfolios'];
     };
 
 function isPeopleResponse(value: unknown): value is PeopleResponse {
@@ -24,7 +24,7 @@ function isPeopleResponse(value: unknown): value is PeopleResponse {
     typeof m.name === 'string' &&
     typeof m.economicAxis === 'number' &&
     typeof m.socialAxis === 'number' &&
-    Array.isArray(m.domainScores)
+    Array.isArray(m.portfolioScores)
   );
 }
 
@@ -33,13 +33,13 @@ function isSurveyDefinitionResponse(value: unknown): value is SurveyDefinitionRe
   const v = value as Record<string, unknown>;
   if (v.definition === null || typeof v.definition !== 'object') return false;
   const d = v.definition as Record<string, unknown>;
-  if (!Array.isArray(d.domains)) return false;
-  if (d.domains.length === 0) return true;
-  const first = d.domains[0];
+  if (!Array.isArray(d.portfolios)) return false;
+  if (d.portfolios.length === 0) return true;
+  const first = d.portfolios[0];
   if (first === null || typeof first !== 'object') return false;
-  const dom = first as Record<string, unknown>;
+  const port = first as Record<string, unknown>;
   return (
-    typeof dom.id === 'string' && typeof dom.name === 'string' && Array.isArray(dom.items)
+    typeof port.id === 'string' && typeof port.name === 'string' && Array.isArray(port.items)
   );
 }
 
@@ -72,7 +72,7 @@ export function usePeoplePage(): readonly [PeoplePageState, () => void] {
         setState({
           kind: 'ready',
           members: peopleRaw.members,
-          domains: surveyRaw.definition.domains,
+          portfolios: surveyRaw.definition.portfolios,
         });
       } catch {
         if (cancelled) return;

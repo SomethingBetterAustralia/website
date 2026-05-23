@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type {
-  DomainResponses,
+  PortfolioResponses,
   LikertResponse,
   SurveyDefinitionResponse,
   SurveySubmission,
@@ -38,26 +38,26 @@ function isLikertRecord(value: unknown): value is Record<string, LikertResponse>
 }
 
 const VALID_CROSS_CUTTING_CODES = new Set(SURVEY_DEFINITION.crossCutting.map((c) => c.code));
-const VALID_DOMAIN_IDS = new Set(SURVEY_DEFINITION.domains.map((d) => d.id));
-const VALID_ITEM_CODES_BY_DOMAIN = new Map(
-  SURVEY_DEFINITION.domains.map((d) => [d.id, new Set(d.items.map((i) => i.code))]),
+const VALID_PORTFOLIO_IDS = new Set(SURVEY_DEFINITION.portfolios.map((d) => d.id));
+const VALID_ITEM_CODES_BY_PORTFOLIO = new Map(
+  SURVEY_DEFINITION.portfolios.map((d) => [d.id, new Set(d.items.map((i) => i.code))]),
 );
 
-function parseDomainResponses(
+function parsePortfolioResponses(
   value: unknown,
-  domainId: string,
-): DomainResponses | { error: string } {
+  portfolioId: string,
+): PortfolioResponses | { error: string } {
   if (value === null || typeof value !== 'object') {
-    return { error: `invalid domain payload: ${domainId}` };
+    return { error: `invalid portfolio payload: ${portfolioId}` };
   }
   const v = value as Record<string, unknown>;
-  if (!isExpertiseLevel(v.expertise)) return { error: `invalid expertise for ${domainId}` };
-  if (!isLikertRecord(v.responses)) return { error: `invalid responses for ${domainId}` };
-  const allowedCodes = VALID_ITEM_CODES_BY_DOMAIN.get(domainId);
-  if (!allowedCodes) return { error: `unknown domain id: ${domainId}` };
+  if (!isExpertiseLevel(v.expertise)) return { error: `invalid expertise for ${portfolioId}` };
+  if (!isLikertRecord(v.responses)) return { error: `invalid responses for ${portfolioId}` };
+  const allowedCodes = VALID_ITEM_CODES_BY_PORTFOLIO.get(portfolioId);
+  if (!allowedCodes) return { error: `unknown portfolio id: ${portfolioId}` };
   for (const code of Object.keys(v.responses)) {
     if (!allowedCodes.has(code)) {
-      return { error: `unknown item code ${code} in domain ${domainId}` };
+      return { error: `unknown item code ${code} in portfolio ${portfolioId}` };
     }
   }
   return { expertise: v.expertise, responses: v.responses };
@@ -78,20 +78,20 @@ function parseSubmission(body: unknown): SurveySubmission | { error: string } {
       return { error: `unknown crossCutting code: ${code}` };
     }
   }
-  if (b.domains === null || typeof b.domains !== 'object') return { error: 'invalid domains' };
-  const domainsRaw = b.domains as Record<string, unknown>;
-  const domains: Record<string, DomainResponses> = {};
-  for (const [domainId, raw] of Object.entries(domainsRaw)) {
-    if (!VALID_DOMAIN_IDS.has(domainId)) return { error: `unknown domain id: ${domainId}` };
-    const parsed = parseDomainResponses(raw, domainId);
+  if (b.portfolios === null || typeof b.portfolios !== 'object') return { error: 'invalid portfolios' };
+  const portfoliosRaw = b.portfolios as Record<string, unknown>;
+  const portfolios: Record<string, PortfolioResponses> = {};
+  for (const [portfolioId, raw] of Object.entries(portfoliosRaw)) {
+    if (!VALID_PORTFOLIO_IDS.has(portfolioId)) return { error: `unknown portfolio id: ${portfolioId}` };
+    const parsed = parsePortfolioResponses(raw, portfolioId);
     if ('error' in parsed) return parsed;
-    domains[domainId] = parsed;
+    portfolios[portfolioId] = parsed;
   }
   return {
     background: b.background,
     expertiseAreas: b.expertiseAreas,
     crossCutting: b.crossCutting,
-    domains,
+    portfolios,
     ...(isString(b.memberName) ? { memberName: b.memberName } : {}),
     ...(isString(b.openResponse) ? { openResponse: b.openResponse } : {}),
   };

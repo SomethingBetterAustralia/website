@@ -1,12 +1,12 @@
 import { AlertTriangle, ArrowLeft, Bell, ClipboardList, RotateCw, Users, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
-import type { DomainScore, MemberProfile, PeopleResponse } from '@backend/types/people';
-import type { SurveyDefinitionResponse, SurveyDomain } from '@backend/types/survey';
+import type { PortfolioScore, MemberProfile, PeopleResponse } from '@backend/types/people';
+import type { SurveyDefinitionResponse, SurveyPortfolio } from '@backend/types/survey';
 import { Button } from '@/components/ui/button';
 import {
-  DOMAIN_ICONS,
-  DomainSpectra,
+  PORTFOLIO_ICONS,
+  PortfolioSpectra,
   LeaningsScatter,
   expertiseToOpacity,
   type ScatterPoint,
@@ -19,12 +19,12 @@ import { cn } from '@/lib/utils';
 
 type ToggleKey = 'leadership' | 'members' | 'all';
 type Members = PeopleResponse['members'];
-type Domains = SurveyDefinitionResponse['definition']['domains'];
+type Portfolios = SurveyDefinitionResponse['definition']['portfolios'];
 
 function meanExpertise(member: MemberProfile): 1 | 2 | 3 | 4 | 5 {
-  if (member.domainScores.length === 0) return 1;
-  const sum = member.domainScores.reduce((acc, ds) => acc + ds.expertise, 0);
-  const mean = sum / member.domainScores.length;
+  if (member.portfolioScores.length === 0) return 1;
+  const sum = member.portfolioScores.reduce((acc, ds) => acc + ds.expertise, 0);
+  const mean = sum / member.portfolioScores.length;
   return Math.max(1, Math.min(5, Math.round(mean))) as 1 | 2 | 3 | 4 | 5;
 }
 
@@ -40,19 +40,19 @@ function memberToPoint(member: MemberProfile): ScatterPoint {
   };
 }
 
-function domainScoreToPoint(
-  ds: DomainScore,
-  domain: SurveyDomain | undefined,
+function portfolioScoreToPoint(
+  ds: PortfolioScore,
+  portfolio: SurveyPortfolio | undefined,
 ): ScatterPoint | null {
   if (ds.economicComponent === null && ds.socialComponent === null) return null;
   return {
-    id: ds.domainId,
-    label: domain?.name ?? ds.domainId,
+    id: ds.portfolioId,
+    label: portfolio?.name ?? ds.portfolioId,
     sublabel: `Expertise: ${ds.expertise}/5 · Score: ${Math.round(ds.score)}`,
     economicAxis: ds.economicComponent ?? 0,
     socialAxis: ds.socialComponent ?? 0,
     opacity: expertiseToOpacity(ds.expertise),
-    icon: DOMAIN_ICONS[ds.domainId],
+    icon: PORTFOLIO_ICONS[ds.portfolioId],
   };
 }
 
@@ -63,7 +63,7 @@ export function People() {
     <div className="flex flex-col gap-16 px-6 pb-24 pt-6 min-[880px]:gap-24 min-[880px]:px-12 min-[880px]:pt-10">
       <PeopleBand state={state} retry={retry} reduce={reduce} />
       <Caveat reduce={reduce}>
-        Axes are derived from the twelve policy domains in the Leadership Leanings Survey,
+        Axes are derived from the policy portfolios in the Leadership Leanings Survey,
         aggregated by the economic and social mapping recorded against each item in the
         survey definition. Member profiles are placeholders until enough real submissions
         exist; the visible spread demonstrates how the chart will look once the team has
@@ -111,7 +111,7 @@ function PeopleHeader({ reduce }: { reduce: boolean }) {
       >
         Something Better Australia is built by people who would not agree on everything if you sat
         them around a kitchen table — and that is exactly the point. Below is where each of us sits
-        across the major policy domains. Click anyone to see the detail.
+        across the major policy portfolios. Click anyone to see the detail.
       </motion.p>
     </motion.header>
   );
@@ -148,7 +148,7 @@ function PeopleBand({
   }
   return (
     <section className="mx-auto w-full max-w-5xl">
-      <Visualisation members={state.members} domains={state.domains} reduce={reduce} />
+      <Visualisation members={state.members} portfolios={state.portfolios} reduce={reduce} />
     </section>
   );
 }
@@ -188,16 +188,16 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 
 function Visualisation({
   members,
-  domains,
+  portfolios,
   reduce,
 }: {
   members: Members;
-  domains: Domains;
+  portfolios: Portfolios;
   reduce: boolean;
 }) {
   const [toggle, setToggle] = React.useState<ToggleKey>('leadership');
   const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
-  const [selectedDomainId, setSelectedDomainId] = React.useState<string | undefined>(undefined);
+  const [selectedPortfolioId, setSelectedPortfolioId] = React.useState<string | undefined>(undefined);
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
   const counts = React.useMemo(() => {
@@ -220,37 +220,37 @@ function Visualisation({
     [selectedId, members],
   );
 
-  const selectedDomain = React.useMemo(
-    () => (selectedDomainId ? domains.find((d) => d.id === selectedDomainId) : undefined),
-    [selectedDomainId, domains],
+  const selectedPortfolio = React.useMemo(
+    () => (selectedPortfolioId ? portfolios.find((d) => d.id === selectedPortfolioId) : undefined),
+    [selectedPortfolioId, portfolios],
   );
 
-  const domainMode = Boolean(selectedMember);
+  const portfolioMode = Boolean(selectedMember);
   const points = React.useMemo<ScatterPoint[]>(() => {
-    if (selectedMember && selectedDomain) {
-      const ds = selectedMember.domainScores.find(
-        (d) => d.domainId === selectedDomain.id,
+    if (selectedMember && selectedPortfolio) {
+      const ds = selectedMember.portfolioScores.find(
+        (d) => d.portfolioId === selectedPortfolio.id,
       );
       if (!ds) return [];
-      const p = domainScoreToPoint(ds, selectedDomain);
+      const p = portfolioScoreToPoint(ds, selectedPortfolio);
       return p ? [p] : [];
     }
     if (selectedMember) {
-      const byId = new Map(domains.map((d) => [d.id, d]));
+      const byId = new Map(portfolios.map((d) => [d.id, d]));
       const out: ScatterPoint[] = [];
-      for (const ds of selectedMember.domainScores) {
-        const p = domainScoreToPoint(ds, byId.get(ds.domainId));
+      for (const ds of selectedMember.portfolioScores) {
+        const p = portfolioScoreToPoint(ds, byId.get(ds.portfolioId));
         if (p) out.push(p);
       }
       return out;
     }
-    if (selectedDomain) {
+    if (selectedPortfolio) {
       const out: ScatterPoint[] = [];
       const ordered = [...filtered].sort(
         (a, b) => Number(a.isLeadership) - Number(b.isLeadership),
       );
       for (const member of ordered) {
-        const ds = member.domainScores.find((d) => d.domainId === selectedDomain.id);
+        const ds = member.portfolioScores.find((d) => d.portfolioId === selectedPortfolio.id);
         if (!ds) continue;
         if (ds.economicComponent === null && ds.socialComponent === null) continue;
         out.push({
@@ -269,7 +269,7 @@ function Visualisation({
       (a, b) => Number(a.isLeadership) - Number(b.isLeadership),
     );
     return ordered.map(memberToPoint);
-  }, [selectedMember, selectedDomain, domains, filtered]);
+  }, [selectedMember, selectedPortfolio, portfolios, filtered]);
 
   function handleSelectMember(id: string) {
     setSelectedId(id);
@@ -286,8 +286,8 @@ function Visualisation({
     setSelectedId(undefined);
   }
 
-  function handleToggleDomain(id: string) {
-    setSelectedDomainId((cur) => (cur === id ? undefined : id));
+  function handleTogglePortfolio(id: string) {
+    setSelectedPortfolioId((cur) => (cur === id ? undefined : id));
   }
 
   return (
@@ -296,7 +296,7 @@ function Visualisation({
         <PeopleHeader reduce={reduce} />
         <div className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:mt-9 min-[880px]:p-8">
           <div className="flex min-h-[2.75rem] items-center">
-            {domainMode && selectedMember ? (
+            {portfolioMode && selectedMember ? (
               <div className="flex w-full items-center justify-between gap-3">
                 <button
                   type="button"
@@ -313,15 +313,15 @@ function Visualisation({
                     </p>
                     <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
                   </div>
-                  {selectedDomain &&
+                  {selectedPortfolio &&
                     (() => {
-                      const Icon = DOMAIN_ICONS[selectedDomain.id];
+                      const Icon = PORTFOLIO_ICONS[selectedPortfolio.id];
                       if (!Icon) return null;
                       return (
                         <div className="relative">
                           <span
-                            aria-label={selectedDomain.name}
-                            className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-navy"
+                            aria-label={selectedPortfolio.name}
+                            className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-white"
                           >
                             <Icon aria-hidden className="size-4" />
                           </span>
@@ -329,7 +329,7 @@ function Visualisation({
                             role="tooltip"
                             className="pointer-events-none absolute right-0 top-full z-10 mt-1 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100"
                           >
-                            {selectedDomain.name}
+                            {selectedPortfolio.name}
                           </span>
                         </div>
                       );
@@ -344,15 +344,15 @@ function Visualisation({
                   onChange={handleToggleChange}
                   reduce={reduce}
                 />
-                {selectedDomain &&
+                {selectedPortfolio &&
                   (() => {
-                    const Icon = DOMAIN_ICONS[selectedDomain.id];
+                    const Icon = PORTFOLIO_ICONS[selectedPortfolio.id];
                     if (!Icon) return null;
                     return (
                       <div className="relative">
                         <span
-                          aria-label={selectedDomain.name}
-                          className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-navy"
+                          aria-label={selectedPortfolio.name}
+                          className="peer flex size-8 shrink-0 items-center justify-center rounded-lg bg-sb-accent-hot text-sb-white"
                         >
                           <Icon aria-hidden className="size-4" />
                         </span>
@@ -360,7 +360,7 @@ function Visualisation({
                           role="tooltip"
                           className="pointer-events-none absolute right-0 top-full z-10 mt-1 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100"
                         >
-                          {selectedDomain.name}
+                          {selectedPortfolio.name}
                         </span>
                       </div>
                     );
@@ -370,27 +370,27 @@ function Visualisation({
           </div>
           <ul
             role="list"
-            className="mt-4 grid list-none grid-cols-6 gap-1.5 p-0 min-[880px]:grid-cols-12"
+            className="mt-4 grid list-none grid-cols-5 gap-0.5 p-0 min-[880px]:grid-cols-15"
           >
-            {domains.map((d) => {
-              const Icon = DOMAIN_ICONS[d.id];
+            {portfolios.map((d) => {
+              const Icon = PORTFOLIO_ICONS[d.id];
               if (!Icon) return null;
-              const isActive = selectedDomainId === d.id;
+              const isActive = selectedPortfolioId === d.id;
               return (
                 <li key={d.id} className="relative">
                   <button
                     type="button"
-                    onClick={() => handleToggleDomain(d.id)}
+                    onClick={() => handleTogglePortfolio(d.id)}
                     aria-label={`Filter by ${d.name}`}
                     aria-pressed={isActive}
                     className={cn(
-                      'peer inline-flex size-8 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                      'peer inline-flex size-6 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
                       isActive
-                        ? 'bg-sb-accent-hot text-sb-navy'
-                        : 'bg-sb-accent/10 text-sb-accent-hot hover:bg-sb-accent/20',
+                        ? 'bg-sb-accent-hot text-sb-white'
+                        : 'text-sb-accent-hot hover:text-sb-navy',
                     )}
                   >
-                    <Icon aria-hidden className="size-4" />
+                    <Icon aria-hidden className={isActive ? 'size-4' : 'size-5'} />
                   </button>
                   <span
                     role="tooltip"
@@ -405,34 +405,34 @@ function Visualisation({
           <div className="mt-6">
             <LeaningsScatter
               points={points}
-              selectedPointId={domainMode ? undefined : selectedId}
-              onSelectPoint={domainMode ? undefined : handleSelectMember}
+              selectedPointId={portfolioMode ? undefined : selectedId}
+              onSelectPoint={portfolioMode ? undefined : handleSelectMember}
             />
           </div>
-          {selectedMember && selectedDomain ? (
+          {selectedMember && selectedPortfolio ? (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
               <span className="font-medium text-sb-navy">{selectedMember.name}</span>&rsquo;s
               position on{' '}
-              <span className="font-medium text-sb-navy">{selectedDomain.name}</span>. Tap the icon
-              again to see all their domains.
+              <span className="font-medium text-sb-navy">{selectedPortfolio.name}</span>. Tap the icon
+              again to see all their portfolios.
             </p>
           ) : selectedMember ? (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
-              Each dot is one policy domain for{' '}
+              Each dot is one policy portfolio for{' '}
               <span className="font-medium text-sb-navy">{selectedMember.name}</span>. The spread
               across quadrants shows that a single person doesn&rsquo;t fit one party — they lean
               one way on some issues, another on others.
             </p>
-          ) : selectedDomain ? (
+          ) : selectedPortfolio ? (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
               Each dot is a member&rsquo;s position on{' '}
-              <span className="font-medium text-sb-navy">{selectedDomain.name}</span>. Click a
-              member to drill into their full domain breakdown.
+              <span className="font-medium text-sb-navy">{selectedPortfolio.name}</span>. Click a
+              member to drill into their full portfolio breakdown.
             </p>
           ) : (
             <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
               Up–down is social and cultural orientation; left–right is economic. Dot opacity
-              reflects how expert that person rates themselves across the domains they answered.
+              reflects how expert that person rates themselves across the portfolios they answered.
             </p>
           )}
         </div>
@@ -449,7 +449,7 @@ function Visualisation({
             >
               <MemberDetail
                 member={selectedMember}
-                domains={domains}
+                portfolios={portfolios}
                 onClear={() => setSelectedId(undefined)}
               />
             </motion.section>
@@ -508,11 +508,11 @@ function Toggle({
 
 function MemberDetail({
   member,
-  domains,
+  portfolios,
   onClear,
 }: {
   member: MemberProfile;
-  domains: Domains;
+  portfolios: Portfolios;
   onClear: () => void;
 }) {
   return (
@@ -537,7 +537,7 @@ function MemberDetail({
         </button>
       </div>
       <div className="mt-6">
-        <DomainSpectra member={member} domains={domains} />
+        <PortfolioSpectra member={member} portfolios={portfolios} />
       </div>
     </div>
   );

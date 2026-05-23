@@ -1,10 +1,10 @@
 import type {
-  DomainResponses,
+  PortfolioResponses,
   LikertResponse,
   SurveyDefinition,
-  SurveyDomain,
+  SurveyPortfolio,
 } from '../types/survey.js';
-import type { DomainScore } from '../types/people.js';
+import type { PortfolioScore } from '../types/people.js';
 
 function isScored(value: LikertResponse | undefined): value is -2 | -1 | 0 | 1 | 2 {
   return value !== null && value !== undefined;
@@ -14,16 +14,16 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-// Domain score: mean of scored items (excluding null and mixed-direction items),
+// Portfolio score: mean of scored items (excluding null and mixed-direction items),
 // sign-flipped on negative-direction items, scaled by 50 to map -2..+2 -> -100..+100.
-// Also returns the per-axis decomposition via scoreDomainAxes.
-export function scoreDomain(
-  domain: SurveyDomain,
-  responses: DomainResponses,
-): DomainScore | null {
+// Also returns the per-axis decomposition via scorePortfolioAxes.
+export function scorePortfolio(
+  portfolio: SurveyPortfolio,
+  responses: PortfolioResponses,
+): PortfolioScore | null {
   let total = 0;
   let count = 0;
-  for (const item of domain.items) {
+  for (const item of portfolio.items) {
     if (item.direction === 'mixed') continue;
     const raw = responses.responses[item.code];
     if (!isScored(raw)) continue;
@@ -32,9 +32,9 @@ export function scoreDomain(
     count += 1;
   }
   if (count === 0) return null;
-  const axes = scoreDomainAxes(domain, responses);
+  const axes = scorePortfolioAxes(portfolio, responses);
   return {
-    domainId: domain.id,
+    portfolioId: portfolio.id,
     score: clamp((total / count) * 50, -100, 100),
     expertise: responses.expertise,
     economicComponent: axes.economic,
@@ -43,28 +43,28 @@ export function scoreDomain(
   };
 }
 
-// Per-domain decomposition into economic / social components. Same per-axis formula
-// as scoreSummaryAxis but restricted to a single domain. Expertise is constant within
-// a domain so the weighted mean collapses to an unweighted one. Returns null on an
-// axis when no items in this domain contributed to it.
-export function scoreDomainAxes(
-  domain: SurveyDomain,
-  responses: DomainResponses,
+// Per-portfolio decomposition into economic / social components. Same per-axis formula
+// as scoreSummaryAxis but restricted to a single portfolio. Expertise is constant within
+// a portfolio so the weighted mean collapses to an unweighted one. Returns null on an
+// axis when no items in this portfolio contributed to it.
+export function scorePortfolioAxes(
+  portfolio: SurveyPortfolio,
+  responses: PortfolioResponses,
 ): { economic: number | null; social: number | null } {
   return {
-    economic: computeAxis(domain, responses, 'economic'),
-    social: computeAxis(domain, responses, 'social'),
+    economic: computeAxis(portfolio, responses, 'economic'),
+    social: computeAxis(portfolio, responses, 'social'),
   };
 }
 
 function computeAxis(
-  domain: SurveyDomain,
-  responses: DomainResponses,
+  portfolio: SurveyPortfolio,
+  responses: PortfolioResponses,
   axis: 'economic' | 'social',
 ): number | null {
   let total = 0;
   let count = 0;
-  for (const item of domain.items) {
+  for (const item of portfolio.items) {
     if (item.summaryAxis !== axis) continue;
     const raw = responses.responses[item.code];
     if (!isScored(raw)) continue;
@@ -81,18 +81,18 @@ function computeAxis(
 // of -2..+2 to -100..+100.
 export function scoreSummaryAxis(
   definition: SurveyDefinition,
-  submission: { domains: Record<string, DomainResponses> },
+  submission: { portfolios: Record<string, PortfolioResponses> },
   axis: 'economic' | 'social',
 ): number {
   let total = 0;
   let weight = 0;
-  for (const domain of definition.domains) {
-    const domainSub = submission.domains[domain.id];
-    if (!domainSub) continue;
-    const expertise = domainSub.expertise;
-    for (const item of domain.items) {
+  for (const portfolio of definition.portfolios) {
+    const portfolioSub = submission.portfolios[portfolio.id];
+    if (!portfolioSub) continue;
+    const expertise = portfolioSub.expertise;
+    for (const item of portfolio.items) {
       if (item.summaryAxis !== axis) continue;
-      const raw = domainSub.responses[item.code];
+      const raw = portfolioSub.responses[item.code];
       if (!isScored(raw)) continue;
       const sign = item.direction === 'negative' ? -1 : 1;
       total += raw * sign * expertise;

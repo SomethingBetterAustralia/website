@@ -12,14 +12,14 @@ import type {
 import { Button } from '@/components/ui/button';
 import { AboutYouStep } from '@/components/survey/AboutYouStep';
 import { CrossCuttingStep } from '@/components/survey/CrossCuttingStep';
-import { DomainStep } from '@/components/survey/DomainStep';
+import { PortfolioStep } from '@/components/survey/PortfolioStep';
 import { OpenResponseStep } from '@/components/survey/OpenResponseStep';
 import { StepShell } from '@/components/survey/StepShell';
 import { Link } from '@/lib/router';
 import { revealUp, staggerContainer } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
-interface DomainFormState {
+interface PortfolioFormState {
   expertise: ExpertiseLevel | undefined;
   responses: Record<string, LikertResponse>;
 }
@@ -29,7 +29,7 @@ interface SurveyFormData {
   background: string;
   expertiseAreas: Set<string>;
   crossCutting: Record<string, LikertResponse>;
-  domains: Record<string, DomainFormState>;
+  portfolios: Record<string, PortfolioFormState>;
   openResponse: string;
 }
 
@@ -42,16 +42,16 @@ type SurveyPageState =
   | { kind: 'submission_error'; message: string; formData: SurveyFormData };
 
 function initialFormData(definition: SurveyDefinition): SurveyFormData {
-  const domains: Record<string, DomainFormState> = {};
-  for (const d of definition.domains) {
-    domains[d.id] = { expertise: undefined, responses: {} };
+  const portfolios: Record<string, PortfolioFormState> = {};
+  for (const d of definition.portfolios) {
+    portfolios[d.id] = { expertise: undefined, responses: {} };
   }
   return {
     memberName: '',
     background: '',
     expertiseAreas: new Set<string>(),
     crossCutting: {},
-    domains,
+    portfolios,
     openResponse: '',
   };
 }
@@ -61,7 +61,7 @@ function isSurveyDefinitionResponse(value: unknown): value is SurveyDefinitionRe
   const v = value as Record<string, unknown>;
   if (v.definition === null || typeof v.definition !== 'object') return false;
   const d = v.definition as Record<string, unknown>;
-  return Array.isArray(d.domains) && Array.isArray(d.crossCutting);
+  return Array.isArray(d.portfolios) && Array.isArray(d.crossCutting);
 }
 
 function isSurveySubmissionResponse(value: unknown): value is SurveySubmissionResponse {
@@ -77,8 +77,8 @@ function toWireSubmission(formData: SurveyFormData): SurveySubmission {
     background: formData.background.trim(),
     expertiseAreas: Array.from(formData.expertiseAreas),
     crossCutting: formData.crossCutting,
-    domains: Object.fromEntries(
-      Object.entries(formData.domains).map(([id, d]) => [
+    portfolios: Object.fromEntries(
+      Object.entries(formData.portfolios).map(([id, d]) => [
         id,
         // canAdvanceFromStep gates expertise being set before submit.
         { expertise: d.expertise as ExpertiseLevel, responses: d.responses },
@@ -90,7 +90,7 @@ function toWireSubmission(formData: SurveyFormData): SurveySubmission {
 }
 
 function totalStepCount(definition: SurveyDefinition): number {
-  return definition.domains.length + 3;
+  return definition.portfolios.length + 3;
 }
 
 function canAdvanceFromStep(
@@ -104,14 +104,14 @@ function canAdvanceFromStep(
   if (stepIndex === 1) {
     return definition.crossCutting.every((item) => item.code in formData.crossCutting);
   }
-  const domainStart = 2;
-  const domainEnd = domainStart + definition.domains.length - 1;
-  if (stepIndex >= domainStart && stepIndex <= domainEnd) {
-    const domain = definition.domains[stepIndex - domainStart];
-    if (!domain) return false;
-    const state = formData.domains[domain.id];
+  const portfolioStart = 2;
+  const portfolioEnd = portfolioStart + definition.portfolios.length - 1;
+  if (stepIndex >= portfolioStart && stepIndex <= portfolioEnd) {
+    const portfolio = definition.portfolios[stepIndex - portfolioStart];
+    if (!portfolio) return false;
+    const state = formData.portfolios[portfolio.id];
     if (!state || state.expertise === undefined) return false;
-    return domain.items.every((item) => item.code in state.responses);
+    return portfolio.items.every((item) => item.code in state.responses);
   }
   return true;
 }
@@ -134,12 +134,12 @@ function stepTitleAndIntro(
         'How you feel about the movement as a whole. Pick a response for each — "No strong view" is a valid answer.',
     };
   }
-  const domainStart = 2;
-  const domainEnd = domainStart + definition.domains.length - 1;
-  if (stepIndex >= domainStart && stepIndex <= domainEnd) {
-    const domain = definition.domains[stepIndex - domainStart];
-    if (!domain) return { title: 'Domain' };
-    return { title: domain.name, intro: domain.blurb };
+  const portfolioStart = 2;
+  const portfolioEnd = portfolioStart + definition.portfolios.length - 1;
+  if (stepIndex >= portfolioStart && stepIndex <= portfolioEnd) {
+    const portfolio = definition.portfolios[stepIndex - portfolioStart];
+    if (!portfolio) return { title: 'Portfolio' };
+    return { title: portfolio.name, intro: portfolio.blurb };
   }
   return { title: 'Anything else', intro: 'Anything you want the team to consider. Optional.' };
 }
@@ -258,7 +258,7 @@ function SurveyHeader({ reduce }: { reduce: boolean }) {
         variants={revealUp}
         className="max-w-[60ch] text-[1.05rem] leading-[1.6] text-sb-text"
       >
-        Fifteen short steps. We use it to plot anonymous dots on the People page, so the team
+        Eighteen short steps. We use it to plot anonymous dots on the People page, so the team
         can see itself honestly. &ldquo;No strong view&rdquo; is a valid answer at any point.
       </motion.p>
     </motion.header>
@@ -418,7 +418,7 @@ function renderStepContent(
         memberName={formData.memberName}
         background={formData.background}
         expertiseAreas={formData.expertiseAreas}
-        domains={definition.domains}
+        portfolios={definition.portfolios}
         onMemberNameChange={(next) => patch({ ...formData, memberName: next })}
         onBackgroundChange={(next) => patch({ ...formData, background: next })}
         onExpertiseAreasChange={(next) => patch({ ...formData, expertiseAreas: next })}
@@ -439,29 +439,29 @@ function renderStepContent(
       />
     );
   }
-  const domainStart = 2;
-  const domainEnd = domainStart + definition.domains.length - 1;
-  if (stepIndex >= domainStart && stepIndex <= domainEnd) {
-    const domain = definition.domains[stepIndex - domainStart];
-    if (!domain) return null;
-    const ds = formData.domains[domain.id] ?? { expertise: undefined, responses: {} };
+  const portfolioStart = 2;
+  const portfolioEnd = portfolioStart + definition.portfolios.length - 1;
+  if (stepIndex >= portfolioStart && stepIndex <= portfolioEnd) {
+    const portfolio = definition.portfolios[stepIndex - portfolioStart];
+    if (!portfolio) return null;
+    const ds = formData.portfolios[portfolio.id] ?? { expertise: undefined, responses: {} };
     return (
-      <DomainStep
-        domain={domain}
+      <PortfolioStep
+        portfolio={portfolio}
         expertise={ds.expertise}
         responses={ds.responses}
         onExpertiseChange={(next) =>
           patch({
             ...formData,
-            domains: { ...formData.domains, [domain.id]: { ...ds, expertise: next } },
+            portfolios: { ...formData.portfolios, [portfolio.id]: { ...ds, expertise: next } },
           })
         }
         onResponseChange={(code, value) =>
           patch({
             ...formData,
-            domains: {
-              ...formData.domains,
-              [domain.id]: { ...ds, responses: { ...ds.responses, [code]: value } },
+            portfolios: {
+              ...formData.portfolios,
+              [portfolio.id]: { ...ds, responses: { ...ds.responses, [code]: value } },
             },
           })
         }

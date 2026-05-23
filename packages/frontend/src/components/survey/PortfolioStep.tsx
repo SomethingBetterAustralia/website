@@ -1,32 +1,32 @@
 import type {
   ExpertiseLevel,
   LikertResponse,
-  SurveyDomain,
+  SurveyPortfolio,
 } from '@backend/types/survey';
 import { ExpertiseRow } from './ExpertiseRow';
 import { LikertRow } from './LikertRow';
 
-export interface DomainStepProps {
-  domain: SurveyDomain;
+export interface PortfolioStepProps {
+  portfolio: SurveyPortfolio;
   expertise: ExpertiseLevel | undefined;
   responses: Record<string, LikertResponse>;
   onExpertiseChange: (next: ExpertiseLevel) => void;
   onResponseChange: (code: string, value: LikertResponse) => void;
 }
 
-export function DomainStep({
-  domain,
+export function PortfolioStep({
+  portfolio,
   expertise,
   responses,
   onExpertiseChange,
   onResponseChange,
-}: DomainStepProps) {
+}: PortfolioStepProps) {
   return (
     <div className="flex flex-col gap-6">
       <ExpertiseRow value={expertise} onChange={onExpertiseChange} />
       <hr className="border-sb-cream-warm" />
       <div className="flex flex-col gap-6">
-        {domain.items.map((item) => (
+        {portfolio.items.map((item) => (
           <LikertRow
             key={item.code}
             statement={item.text}

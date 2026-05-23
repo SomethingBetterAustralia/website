@@ -311,7 +311,7 @@ function OpenPremise({ reduce }: { reduce: ReduceMotion }) {
         >
           Our response isn&rsquo;t to &lsquo;export&rsquo; anything. The problems are global;
           the solutions are local. What can travel is the methodology &mdash; how a party of
-          cross-spectrum domain experts actually works in practice &mdash; and the tools we
+          cross-spectrum portfolio experts actually works in practice &mdash; and the tools we
           build to support it.
         </motion.p>
         <motion.p

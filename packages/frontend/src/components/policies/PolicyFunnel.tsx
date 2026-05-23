@@ -32,7 +32,7 @@ const STAGES: readonly Stage[] = [
     icon: FileEdit,
     name: 'Drafts',
     count: '3 in progress',
-    description: 'Working groups with domain experts shape the draft.',
+    description: 'Working groups with portfolio experts shape the draft.',
   },
   {
     number: '04',

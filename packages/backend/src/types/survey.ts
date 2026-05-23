@@ -13,7 +13,7 @@ export interface SurveyItem {
   readonly summaryAxis: SummaryAxis;
 }
 
-export interface SurveyDomain {
+export interface SurveyPortfolio {
   readonly id: string;
   readonly code: string;
   readonly name: string;
@@ -36,7 +36,7 @@ export interface CrossCuttingItem {
 }
 
 export interface SurveyDefinition {
-  readonly domains: readonly SurveyDomain[];
+  readonly portfolios: readonly SurveyPortfolio[];
   readonly crossCutting: readonly CrossCuttingItem[];
 }
 
@@ -45,7 +45,7 @@ export interface SurveyDefinitionResponse {
   readonly _isMock: true;
 }
 
-export interface DomainResponses {
+export interface PortfolioResponses {
   readonly expertise: ExpertiseLevel;
   readonly responses: Record<string, LikertResponse>;
 }
@@ -55,7 +55,7 @@ export interface SurveySubmission {
   readonly background: string;
   readonly expertiseAreas: readonly string[];
   readonly crossCutting: Record<string, LikertResponse>;
-  readonly domains: Record<string, DomainResponses>;
+  readonly portfolios: Record<string, PortfolioResponses>;
   readonly openResponse?: string;
 }
 

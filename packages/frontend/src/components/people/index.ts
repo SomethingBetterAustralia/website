@@ -1,5 +1,5 @@
-export { DomainSpectra } from './DomainSpectra';
-export type { DomainSpectraProps } from './DomainSpectra';
+export { PortfolioSpectra } from './PortfolioSpectra';
+export type { PortfolioSpectraProps } from './PortfolioSpectra';
 export { LeaningsScatter } from './LeaningsScatter';
 export type { LeaningsScatterProps, ScatterPoint } from './LeaningsScatter';
 export { MemberChip } from './MemberChip';
@@ -10,4 +10,4 @@ export {
   polygonVertices,
   scoreToNormalised,
 } from './leanings-math';
-export { DOMAIN_ICONS } from './domain-icons';
+export { PORTFOLIO_ICONS } from './portfolio-icons';

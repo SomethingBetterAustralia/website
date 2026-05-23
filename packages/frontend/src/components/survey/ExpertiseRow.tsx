@@ -12,7 +12,7 @@ export function ExpertiseRow({ value, onChange }: ExpertiseRowProps) {
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="m-0 p-0 text-[0.95rem] leading-[1.4] text-sb-text">
-        How would you rate your expertise in this domain?
+        How would you rate your expertise in this portfolio?
       </legend>
       <div className="flex items-center justify-between gap-2">
         {LEVELS.map((level) => {

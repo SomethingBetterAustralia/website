@@ -1,15 +1,15 @@
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
-import type { DomainScore, MemberProfile } from '@backend/types/people';
-import type { LikertResponse, SurveyDomain } from '@backend/types/survey';
+import type { PortfolioScore, MemberProfile } from '@backend/types/people';
+import type { LikertResponse, SurveyPortfolio } from '@backend/types/survey';
 import { cn } from '@/lib/utils';
-import { DOMAIN_ICONS } from './domain-icons';
+import { PORTFOLIO_ICONS } from './portfolio-icons';
 import { expertiseToOpacity, scoreToNormalised } from './leanings-math';
 
-export interface DomainSpectraProps {
+export interface PortfolioSpectraProps {
   member: MemberProfile;
-  domains: readonly SurveyDomain[];
+  portfolios: readonly SurveyPortfolio[];
 }
 
 const LIKERT_VALUES: readonly (-2 | -1 | 0 | 1 | 2)[] = [-2, -1, 0, 1, 2];
@@ -21,11 +21,11 @@ const LIKERT_LABEL: Record<number, string> = {
   [2]: 'Strongly agree',
 };
 
-function inferAxisHint(domain: SurveyDomain): { left: string; right: string } {
+function inferAxisHint(portfolio: SurveyPortfolio): { left: string; right: string } {
   let economic = 0;
   let social = 0;
   let mixed = 0;
-  for (const item of domain.items) {
+  for (const item of portfolio.items) {
     if (item.summaryAxis === 'economic') economic += 1;
     else if (item.summaryAxis === 'social') social += 1;
     else mixed += 1;
@@ -59,7 +59,7 @@ function LikertDisplay({ response }: { response: LikertResponse }) {
   );
 }
 
-function ExpertiseDisplay({ expertise }: { expertise: DomainScore['expertise'] }) {
+function ExpertiseDisplay({ expertise }: { expertise: PortfolioScore['expertise'] }) {
   return (
     <div className="flex flex-wrap items-center gap-2.5">
       <Sparkles aria-hidden className="size-4 text-sb-accent-hot" />
@@ -82,18 +82,18 @@ function ExpertiseDisplay({ expertise }: { expertise: DomainScore['expertise'] }
   );
 }
 
-interface DomainRowProps {
-  readonly domain: SurveyDomain;
-  readonly score: DomainScore | undefined;
+interface PortfolioRowProps {
+  readonly portfolio: SurveyPortfolio;
+  readonly score: PortfolioScore | undefined;
   readonly index: number;
   readonly reduce: boolean | null;
 }
 
-function DomainRow({ domain, score, index, reduce }: DomainRowProps) {
+function PortfolioRow({ portfolio, score, index, reduce }: PortfolioRowProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const panelId = `domain-panel-${domain.id}`;
-  const Icon = DOMAIN_ICONS[domain.id];
-  const hint = inferAxisHint(domain);
+  const panelId = `portfolio-panel-${portfolio.id}`;
+  const Icon = PORTFOLIO_ICONS[portfolio.id];
+  const hint = inferAxisHint(portfolio);
   const targetCx = score ? scoreToNormalised(score.score) * 400 : 200;
   const opacity = score ? expertiseToOpacity(score.expertise) : 0;
   const readout = score
@@ -124,8 +124,8 @@ function DomainRow({ domain, score, index, reduce }: DomainRowProps) {
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-display text-sm font-medium text-sb-navy">{domain.name}</div>
-            <div className="text-xs text-sb-text-muted">{domain.blurb}</div>
+            <div className="font-display text-sm font-medium text-sb-navy">{portfolio.name}</div>
+            <div className="text-xs text-sb-text-muted">{portfolio.blurb}</div>
           </div>
           {expandable && (
             <ChevronDown
@@ -200,7 +200,7 @@ function DomainRow({ domain, score, index, reduce }: DomainRowProps) {
             <div className="mb-4 mt-1 rounded-2xl bg-sb-white p-5 ring-1 ring-sb-cream-warm">
               <ExpertiseDisplay expertise={score.expertise} />
               <ul role="list" className="mt-4 flex list-none flex-col p-0">
-                {domain.items.map((item) => (
+                {portfolio.items.map((item) => (
                   <li
                     key={item.code}
                     className="flex flex-col gap-2 border-t border-sb-cream-warm/40 py-3 first:border-t-0 first:pt-1 last:pb-1"
@@ -218,16 +218,16 @@ function DomainRow({ domain, score, index, reduce }: DomainRowProps) {
   );
 }
 
-export function DomainSpectra({ member, domains }: DomainSpectraProps) {
+export function PortfolioSpectra({ member, portfolios }: PortfolioSpectraProps) {
   const reduce = useReducedMotion();
-  const scoresById = new Map(member.domainScores.map((d) => [d.domainId, d]));
+  const scoresById = new Map(member.portfolioScores.map((d) => [d.portfolioId, d]));
   return (
     <div className="flex flex-col">
-      {domains.map((domain, index) => (
-        <DomainRow
-          key={domain.id}
-          domain={domain}
-          score={scoresById.get(domain.id)}
+      {portfolios.map((portfolio, index) => (
+        <PortfolioRow
+          key={portfolio.id}
+          portfolio={portfolio}
+          score={scoresById.get(portfolio.id)}
           index={index}
           reduce={reduce}
         />

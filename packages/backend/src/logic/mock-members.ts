@@ -1,17 +1,17 @@
-// MOCK: 42 stand-in member profiles with hand-picked anchor positions and
-// procedurally-generated per-domain responses. Uses a fixed PRNG seed so the
+// MOCK: stand-in member profiles with hand-picked anchor positions and
+// procedurally-generated per-portfolio responses. Uses a fixed PRNG seed so the
 // same scores appear across dev restarts. Replace once real survey
 // submissions exist. Per-member economicAxis / socialAxis are derived via
 // scoreSummaryAxis from the synthetic responses, so the data is internally
 // consistent with the scoring contract.
 
 import type {
-  DomainResponses,
+  PortfolioResponses,
   LikertResponse,
 } from '../types/survey.js';
-import type { DomainScore, MemberProfile } from '../types/people.js';
+import type { PortfolioScore, MemberProfile } from '../types/people.js';
 import { SURVEY_DEFINITION } from './survey-definition.js';
-import { scoreDomain, scoreSummaryAxis } from './survey-scoring.js';
+import { scorePortfolio, scoreSummaryAxis } from './survey-scoring.js';
 
 const SEED = 0xc0ffee;
 
@@ -43,6 +43,9 @@ const LEADERSHIP_ANCHORS: readonly Anchor[] = [
   [50, -65],
   [40, -55],
   [60, -45],
+  [10, 25],
+  [-15, -20],
+  [30, -10],
 ];
 
 interface Identity {
@@ -65,6 +68,9 @@ const IDENTITIES: readonly Identity[] = [
   { id: 'm-010', name: 'Theo Vassilakis', role: 'Communications lead', background: 'Former ABC producer' },
   { id: 'm-011', name: 'Renee Holborow', role: 'Policy lead (health)', background: 'Aged-care consultant' },
   { id: 'm-012', name: 'Toby Quintrell', role: 'Policy lead (education)', background: 'Maths teacher and curriculum designer' },
+  { id: 'm-043', name: 'Yusuf Belir', role: 'Policy lead (industry & trade)', background: 'Former Productivity Commission economist, Sydney' },
+  { id: 'm-044', name: 'Tania Rourke', role: 'Policy lead (agriculture & regions)', background: 'Farm-business consultant, Wagga Wagga' },
+  { id: 'm-045', name: 'Nina Whitlam', role: 'Policy lead (technology & digital)', background: 'Cybersecurity researcher, Canberra' },
   { id: 'm-013', name: 'Sarah Cavendish', role: 'Member', background: 'GP in regional NSW' },
   { id: 'm-014', name: 'Marcus Penberthy', role: 'Member', background: 'Software engineer, Adelaide' },
   { id: 'm-015', name: 'Aroha Sutherland', role: 'Member', background: 'Primary-school teacher' },
@@ -166,26 +172,26 @@ function generateMember(
   const expertCount = 2 + Math.floor(prng() * 2);
   const moderateCount = 3 + Math.floor(prng() * 2);
 
-  const domainIds = SURVEY_DEFINITION.domains.map((d) => d.id);
-  const shuffled = shuffleSeeded(domainIds, prng);
+  const portfolioIds = SURVEY_DEFINITION.portfolios.map((d) => d.id);
+  const shuffled = shuffleSeeded(portfolioIds, prng);
 
-  const expertiseByDomain: Record<string, 1 | 2 | 3 | 4 | 5> = {};
+  const expertiseByPortfolio: Record<string, 1 | 2 | 3 | 4 | 5> = {};
   shuffled.forEach((id, i) => {
     if (i < expertCount) {
-      expertiseByDomain[id] = (4 + Math.floor(prng() * 2)) as 4 | 5;
+      expertiseByPortfolio[id] = (4 + Math.floor(prng() * 2)) as 4 | 5;
     } else if (i < expertCount + moderateCount) {
-      expertiseByDomain[id] = 3;
+      expertiseByPortfolio[id] = 3;
     } else {
-      expertiseByDomain[id] = (1 + Math.floor(prng() * 2)) as 1 | 2;
+      expertiseByPortfolio[id] = (1 + Math.floor(prng() * 2)) as 1 | 2;
     }
   });
 
-  const domains: Record<string, DomainResponses> = {};
-  for (const domain of SURVEY_DEFINITION.domains) {
-    const expertise = expertiseByDomain[domain.id] as 1 | 2 | 3 | 4 | 5;
+  const portfolios: Record<string, PortfolioResponses> = {};
+  for (const portfolio of SURVEY_DEFINITION.portfolios) {
+    const expertise = expertiseByPortfolio[portfolio.id] as 1 | 2 | 3 | 4 | 5;
     const nullProb = NULL_PROB_BY_EXPERTISE[expertise];
     const responses: Record<string, LikertResponse> = {};
-    for (const item of domain.items) {
+    for (const item of portfolio.items) {
       if (prng() < nullProb) {
         responses[item.code] = null;
         continue;
@@ -198,17 +204,17 @@ function generateMember(
       const signedTarget = item.direction === 'negative' ? -axisVal : axisVal;
       responses[item.code] = sampleLikertBiased(signedTarget, prng);
     }
-    domains[domain.id] = { expertise, responses };
+    portfolios[portfolio.id] = { expertise, responses };
   }
 
-  const submission = { domains };
+  const submission = { portfolios };
 
-  const domainScores: DomainScore[] = [];
-  for (const domain of SURVEY_DEFINITION.domains) {
-    const submission = domains[domain.id];
+  const portfolioScores: PortfolioScore[] = [];
+  for (const portfolio of SURVEY_DEFINITION.portfolios) {
+    const submission = portfolios[portfolio.id];
     if (!submission) continue;
-    const score = scoreDomain(domain, submission);
-    if (score !== null) domainScores.push(score);
+    const score = scorePortfolio(portfolio, submission);
+    if (score !== null) portfolioScores.push(score);
   }
 
   const economicAxis = scoreSummaryAxis(SURVEY_DEFINITION, submission, 'economic');
@@ -219,17 +225,21 @@ function generateMember(
     name: identity.name,
     role: identity.role,
     background: identity.background,
-    isLeadership: idx < 12,
+    isLeadership: idx < 15,
     economicAxis,
     socialAxis,
-    domainScores,
+    portfolioScores,
     _isMock: true,
   };
 }
 
 function generateAllMembers(): readonly MemberProfile[] {
   const prng = mulberry32(SEED);
-  const generalAnchors = generateGeneralAnchors(prng, 30, LEADERSHIP_ANCHORS);
+  const generalAnchors = generateGeneralAnchors(
+    prng,
+    IDENTITIES.length - LEADERSHIP_ANCHORS.length,
+    LEADERSHIP_ANCHORS,
+  );
   const anchorByIdx: readonly Anchor[] = [...LEADERSHIP_ANCHORS, ...generalAnchors];
 
   const members: MemberProfile[] = IDENTITIES.map((identity, idx) =>

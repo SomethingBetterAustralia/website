@@ -185,7 +185,7 @@ function PoliciesHero({ reduce }: { reduce: ReduceMotion }) {
       >
         Conventional parties write policy behind closed doors. We do it in four open stages
         &mdash; anyone can submit an idea; the community clusters and votes on what matters;
-        domain experts draft; and the party adopts only the proposals that survive all four.
+        portfolio experts draft; and the party adopts only the proposals that survive all four.
         The signal we&rsquo;re chasing isn&rsquo;t what&rsquo;s popular. It&rsquo;s what the
         left and the right of our membership both end up agreeing with after looking at the
         evidence.
@@ -430,7 +430,7 @@ function PoliciesDrafts({ reduce }: { reduce: ReduceMotion }) {
         className="mb-8 max-w-[64ch] text-[1.05rem] leading-[1.6] text-sb-text"
       >
         Themes that survive consensus voting get handed to a working group. Every group includes
-        at least one domain expert (often more), at least one community contributor from the
+        at least one portfolio expert (often more), at least one community contributor from the
         originating ideas, and at least one person from a different political leaning than the
         bulk of the support. They produce a structured draft: the problem, the proposal, the
         evidence, the tradeoffs, the estimated cost, and the dissents.

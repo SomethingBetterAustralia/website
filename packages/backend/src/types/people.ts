@@ -1,7 +1,7 @@
 import type { ExpertiseLevel, LikertResponse } from './survey.js';
 
-export interface DomainScore {
-  readonly domainId: string;
+export interface PortfolioScore {
+  readonly portfolioId: string;
   readonly score: number;
   readonly expertise: ExpertiseLevel;
   readonly economicComponent: number | null;
@@ -17,7 +17,7 @@ export interface MemberProfile {
   readonly isLeadership: boolean;
   readonly economicAxis: number;
   readonly socialAxis: number;
-  readonly domainScores: readonly DomainScore[];
+  readonly portfolioScores: readonly PortfolioScore[];
   readonly _isMock: true;
 }
 
