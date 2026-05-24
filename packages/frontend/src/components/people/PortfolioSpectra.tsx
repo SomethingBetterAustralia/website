@@ -2,7 +2,7 @@ import { ChevronDown, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 import type { PortfolioScore, MemberProfile } from '@backend/types/people';
-import type { LikertResponse, SurveyPortfolio } from '@backend/types/survey';
+import type { LikertResponse, SurveyItem, SurveyPortfolio } from '@backend/types/survey';
 import { cn } from '@/lib/utils';
 import { PORTFOLIO_ICONS } from './portfolio-icons';
 import { expertiseToOpacity, scoreToNormalised } from './leanings-math';
@@ -12,16 +12,16 @@ export interface PortfolioSpectraProps {
   portfolios: readonly SurveyPortfolio[];
 }
 
-const LIKERT_VALUES: readonly (-2 | -1 | 0 | 1 | 2)[] = [-2, -1, 0, 1, 2];
-const LIKERT_LABEL: Record<number, string> = {
-  [-2]: 'Strongly disagree',
-  [-1]: 'Disagree',
-  [0]: 'Neutral',
-  [1]: 'Agree',
-  [2]: 'Strongly agree',
-};
+interface AxisHint {
+  readonly left: string;
+  readonly right: string;
+}
 
-function inferAxisHint(portfolio: SurveyPortfolio): { left: string; right: string } {
+const ECON_HINT: AxisHint = { left: 'Interventionist', right: 'Market' };
+const SOCIAL_HINT: AxisHint = { left: 'Progressive', right: 'Traditional' };
+const NEUTRAL_HINT: AxisHint = { left: 'Less', right: 'More' };
+
+function inferAxisHint(portfolio: SurveyPortfolio): AxisHint {
   let economic = 0;
   let social = 0;
   let mixed = 0;
@@ -30,54 +30,192 @@ function inferAxisHint(portfolio: SurveyPortfolio): { left: string; right: strin
     else if (item.summaryAxis === 'social') social += 1;
     else mixed += 1;
   }
-  if (economic >= social && economic >= mixed) return { left: 'Interventionist', right: 'Market' };
-  if (social >= mixed) return { left: 'Progressive', right: 'Traditional' };
-  return { left: 'Less', right: 'More' };
+  if (economic >= social && economic >= mixed) return ECON_HINT;
+  if (social >= mixed) return SOCIAL_HINT;
+  return NEUTRAL_HINT;
 }
 
-function LikertDisplay({ response }: { response: LikertResponse }) {
-  const skipped = response === null;
+interface AggregateSliderProps {
+  readonly value: number | null;
+  readonly opacity: number;
+  readonly index: number;
+  readonly reduce: boolean | null;
+  readonly hint: AxisHint;
+  readonly label?: string;
+}
+
+function AggregateSlider({
+  value,
+  opacity,
+  index,
+  reduce,
+  hint,
+  label,
+}: AggregateSliderProps) {
+  const targetCx = value !== null ? scoreToNormalised(value) * 400 : 200;
   return (
-    <div className="flex flex-wrap items-center gap-2.5">
-      <span className="inline-flex items-center gap-1">
-        {LIKERT_VALUES.map((v) => (
-          <span
-            key={v}
-            className={cn(
-              'size-2 rounded-full',
-              !skipped && response === v ? 'bg-sb-accent-hot' : 'bg-sb-cream-warm',
-            )}
-          />
-        ))}
-      </span>
-      {skipped ? (
-        <span className="text-xs italic text-sb-text-muted">Skipped</span>
-      ) : (
-        <span className="text-xs font-medium text-sb-navy">{LIKERT_LABEL[response]}</span>
+    <div className="flex flex-col gap-1">
+      {label && (
+        <span className="text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-sb-accent-hot">
+          {label}
+        </span>
       )}
+      <svg viewBox="0 0 400 32" className="h-auto w-full" aria-hidden>
+        <rect x={0} y={12} width={400} height={8} rx={4} className="fill-sb-cream-warm" />
+        <line x1={200} y1={6} x2={200} y2={26} strokeWidth={1.5} className="stroke-sb-cream" />
+        {value !== null ? (
+          reduce ? (
+            <circle
+              cx={targetCx}
+              cy={16}
+              r={8}
+              fillOpacity={opacity}
+              className="fill-sb-navy"
+            />
+          ) : (
+            <motion.circle
+              cx={200}
+              cy={16}
+              r={8}
+              fillOpacity={opacity}
+              className="fill-sb-navy"
+              animate={{ cx: targetCx }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: index * 0.04 }}
+            />
+          )
+        ) : (
+          <text
+            x={200}
+            y={20}
+            textAnchor="middle"
+            className="fill-sb-text-muted text-[0.7rem]"
+          >
+            —
+          </text>
+        )}
+      </svg>
+      <div className="flex justify-between text-[0.6rem] uppercase tracking-[0.18em] text-sb-text-muted">
+        <span>{hint.left}</span>
+        <span>{hint.right}</span>
+      </div>
     </div>
   );
 }
 
-function ExpertiseDisplay({ expertise }: { expertise: PortfolioScore['expertise'] }) {
+function LikertSlider({
+  response,
+  reduce,
+  index,
+}: {
+  response: LikertResponse;
+  reduce: boolean | null;
+  index: number;
+}) {
+  const skipped = response === null;
+  // Map -2..+2 onto the same 0..400 track the aggregated slider uses:
+  // -2 -> 0 (far left), 0 -> 200 (centre), +2 -> 400 (far right).
+  const targetCx = skipped ? 200 : 200 + response * 100;
   return (
-    <div className="flex flex-wrap items-center gap-2.5">
-      <Sparkles aria-hidden className="size-4 text-sb-accent-hot" />
-      <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-sb-text-muted">
-        Self-rated expertise
-      </span>
-      <span className="inline-flex items-center gap-1">
+    <div className="flex flex-col gap-1">
+      <svg viewBox="0 0 400 32" className="h-auto w-full" aria-hidden>
+        <rect x={0} y={13} width={400} height={6} rx={3} className="fill-sb-cream-warm" />
+        <line x1={200} y1={7} x2={200} y2={25} strokeWidth={1.5} className="stroke-sb-cream" />
+        {skipped ? (
+          <text
+            x={200}
+            y={20}
+            textAnchor="middle"
+            className="fill-sb-text-muted text-[0.7rem]"
+          >
+            —
+          </text>
+        ) : reduce ? (
+          <circle cx={targetCx} cy={16} r={7} className="fill-sb-navy" />
+        ) : (
+          <motion.circle
+            cx={200}
+            cy={16}
+            r={7}
+            className="fill-sb-navy"
+            animate={{ cx: targetCx }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: index * 0.04 }}
+          />
+        )}
+      </svg>
+      <div className="flex justify-between text-[0.55rem] uppercase tracking-[0.18em] text-sb-text-muted">
+        {skipped ? (
+          <>
+            <span />
+            <span className="italic normal-case tracking-normal">Skipped</span>
+          </>
+        ) : (
+          <>
+            <span>Strongly disagree</span>
+            <span>Strongly agree</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExpertisePill({ expertise }: { expertise: PortfolioScore['expertise'] }) {
+  return (
+    <div className="mt-1 flex items-center gap-1.5">
+      <Sparkles aria-hidden className="size-3 text-sb-accent-hot" />
+      <span className="inline-flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map((n) => (
           <span
             key={n}
             className={cn(
-              'size-2 rounded-full',
+              'size-1.5 rounded-full',
               n <= expertise ? 'bg-sb-accent-hot' : 'bg-sb-cream-warm',
             )}
           />
         ))}
       </span>
-      <span className="text-xs font-medium text-sb-navy">{expertise} of 5</span>
+      <span className="text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-sb-text-muted">
+        Expertise {expertise}/5
+      </span>
+    </div>
+  );
+}
+
+interface QuestionGridProps {
+  readonly items: readonly SurveyItem[];
+  readonly responses: Record<string, LikertResponse>;
+  readonly reduce: boolean | null;
+  readonly baseIndex: number;
+  readonly labelOf: (item: SurveyItem) => string;
+}
+
+function QuestionGrid({ items, responses, reduce, baseIndex, labelOf }: QuestionGridProps) {
+  return (
+    <div className="grid grid-cols-1 gap-x-4 min-[880px]:grid-cols-[2fr_3fr]">
+      {items.map((item, i) => (
+        <React.Fragment key={item.code}>
+          <p
+            className={cn(
+              'm-0 pb-1 pl-[38px] pt-3 text-xs font-light text-sb-text-muted min-[880px]:pb-3',
+              i > 0 && 'border-t border-sb-cream-warm/40',
+            )}
+          >
+            <span className="font-medium text-sb-navy">{labelOf(item)}</span> {item.text}
+          </p>
+          <div
+            className={cn(
+              'pb-3 pt-1 min-[880px]:py-3 min-[880px]:self-center',
+              i > 0 && 'min-[880px]:border-t min-[880px]:border-sb-cream-warm/40',
+            )}
+          >
+            <LikertSlider
+              response={responses[item.code] ?? null}
+              reduce={reduce}
+              index={baseIndex + i}
+            />
+          </div>
+        </React.Fragment>
+      ))}
     </div>
   );
 }
@@ -93,39 +231,62 @@ function PortfolioRow({ portfolio, score, index, reduce }: PortfolioRowProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const panelId = `portfolio-panel-${portfolio.id}`;
   const Icon = PORTFOLIO_ICONS[portfolio.id];
-  const hint = inferAxisHint(portfolio);
-  const targetCx = score ? scoreToNormalised(score.score) * 400 : 200;
   const opacity = score ? expertiseToOpacity(score.expertise) : 0;
-  const readout = score
-    ? `Score ${Math.round(score.score)} out of 100, expertise level ${score.expertise} of 5`
-    : 'No score reported.';
   const expandable = Boolean(score);
 
+  const letter = String.fromCharCode(65 + index);
+  const itemNumberByCode = new Map<string, number>();
+  portfolio.items.forEach((item, i) => itemNumberByCode.set(item.code, i + 1));
+  const labelOf = (item: SurveyItem) =>
+    `${letter}.${itemNumberByCode.get(item.code) ?? '?'}`;
+
+  const econItems = portfolio.items.filter((i) => i.summaryAxis === 'economic');
+  const socialItems = portfolio.items.filter((i) => i.summaryAxis === 'social');
+  const otherItems = portfolio.items.filter((i) => i.summaryAxis === 'none');
+  const isMulti = econItems.length > 0 && socialItems.length > 0;
+
+  const readout = score
+    ? isMulti
+      ? `Economic ${Math.round(score.economicComponent ?? 0)}, Social ${Math.round(score.socialComponent ?? 0)}, expertise ${score.expertise} of 5`
+      : `Score ${Math.round(score.score)} out of 100, expertise ${score.expertise} of 5`
+    : 'No score reported.';
+
+  const firstLabel: string | undefined = isMulti
+    ? 'Economic'
+    : econItems.length > 0
+      ? 'Economic'
+      : socialItems.length > 0
+        ? 'Social'
+        : undefined;
+
   return (
-    <div className="border-b border-sb-cream-warm/60 last:border-b-0">
-      <button
-        type="button"
-        onClick={expandable ? () => setIsOpen((v) => !v) : undefined}
-        aria-expanded={expandable ? isOpen : undefined}
-        aria-controls={expandable ? panelId : undefined}
-        disabled={!expandable}
-        className={cn(
-          'grid w-full grid-cols-1 gap-2 rounded-lg py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
-          'min-[880px]:grid-cols-[2fr_3fr] min-[880px]:items-center min-[880px]:gap-4',
-          expandable
-            ? 'cursor-pointer hover:bg-sb-cream-warm/30'
-            : 'cursor-default opacity-70',
-        )}
-      >
-        <div className="flex items-start gap-2.5">
+    <div className="border-b-2 border-sb-navy/15 py-4 last:border-b-0">
+      <div className="grid grid-cols-1 gap-y-2 min-[880px]:grid-cols-[2fr_3fr] min-[880px]:items-start min-[880px]:gap-x-4 min-[880px]:gap-y-3">
+        <button
+          type="button"
+          onClick={expandable ? () => setIsOpen((v) => !v) : undefined}
+          aria-expanded={expandable ? isOpen : undefined}
+          aria-controls={expandable ? panelId : undefined}
+          disabled={!expandable}
+          className={cn(
+            'flex items-start gap-2.5 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+            expandable
+              ? 'cursor-pointer hover:bg-sb-cream-warm/30'
+              : 'cursor-default opacity-70',
+          )}
+        >
           {Icon && (
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sb-accent/10">
               <Icon className="size-3.5 text-sb-accent-hot" aria-hidden />
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-display text-sm font-medium text-sb-navy">{portfolio.name}</div>
+            <div className="font-display text-sm font-medium text-sb-navy">
+              ({letter}) {portfolio.name}
+            </div>
             <div className="text-xs text-sb-text-muted">{portfolio.blurb}</div>
+            {score && <ExpertisePill expertise={score.expertise} />}
+            <span className="sr-only">{readout}</span>
           </div>
           {expandable && (
             <ChevronDown
@@ -136,84 +297,118 @@ function PortfolioRow({ portfolio, score, index, reduce }: PortfolioRowProps) {
               )}
             />
           )}
+        </button>
+
+        <div>
+          <AggregateSlider
+            value={isMulti ? (score?.economicComponent ?? null) : (score?.score ?? null)}
+            opacity={opacity}
+            index={index}
+            reduce={reduce}
+            hint={isMulti ? ECON_HINT : inferAxisHint(portfolio)}
+            label={firstLabel}
+          />
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="sr-only">{readout}</span>
-          <svg viewBox="0 0 400 32" className="h-auto w-full" aria-hidden>
-            <rect x={0} y={12} width={400} height={8} rx={4} className="fill-sb-cream-warm" />
-            <line
-              x1={200}
-              y1={6}
-              x2={200}
-              y2={26}
-              strokeWidth={1.5}
-              className="stroke-sb-cream"
-            />
-            {score ? (
-              reduce ? (
-                <circle
-                  cx={targetCx}
-                  cy={16}
-                  r={8}
-                  fillOpacity={opacity}
-                  className="fill-sb-navy"
-                />
-              ) : (
-                <motion.circle
-                  cx={200}
-                  cy={16}
-                  r={8}
-                  fillOpacity={opacity}
-                  className="fill-sb-navy"
-                  animate={{ cx: targetCx }}
-                  transition={{ duration: 0.6, ease: 'easeOut', delay: index * 0.04 }}
-                />
-              )
-            ) : (
-              <text
-                x={200}
-                y={20}
-                textAnchor="middle"
-                className="fill-sb-text-muted text-[0.7rem]"
-              >
-                —
-              </text>
-            )}
-          </svg>
-          <div className="flex justify-between text-[0.6rem] uppercase tracking-[0.18em] text-sb-text-muted">
-            <span>{hint.left}</span>
-            <span>{hint.right}</span>
-          </div>
-        </div>
-      </button>
-      <AnimatePresence initial={false}>
-        {isOpen && score && (
-          <motion.div
-            id={panelId}
-            key="panel"
-            initial={reduce ? false : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={reduce ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
-            className="overflow-hidden"
-          >
-            <div className="mb-4 mt-1 rounded-2xl bg-sb-white p-5 ring-1 ring-sb-cream-warm">
-              <ExpertiseDisplay expertise={score.expertise} />
-              <ul role="list" className="mt-4 flex list-none flex-col p-0">
-                {portfolio.items.map((item) => (
-                  <li
-                    key={item.code}
-                    className="flex flex-col gap-2 border-t border-sb-cream-warm/40 py-3 first:border-t-0 first:pt-1 last:pb-1"
-                  >
-                    <p className="m-0 text-sm leading-[1.5] text-sb-text">{item.text}</p>
-                    <LikertDisplay response={score.responses?.[item.code] ?? null} />
-                  </li>
-                ))}
-              </ul>
+
+        <AnimatePresence initial={false}>
+          {isOpen && score && (
+            <motion.div
+              key={`${panelId}-first`}
+              id={panelId}
+              initial={reduce ? false : { height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={reduce ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+              className="overflow-hidden min-[880px]:col-span-2"
+            >
+              <QuestionGrid
+                items={isMulti ? econItems : portfolio.items}
+                responses={score.responses}
+                reduce={reduce}
+                baseIndex={0}
+                labelOf={labelOf}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {isMulti && (
+          <>
+            <div className="min-[880px]:col-start-2">
+              <AggregateSlider
+                value={score?.socialComponent ?? null}
+                opacity={opacity}
+                index={index}
+                reduce={reduce}
+                hint={SOCIAL_HINT}
+                label="Social"
+              />
             </div>
-          </motion.div>
+            <AnimatePresence initial={false}>
+              {isOpen && score && (
+                <motion.div
+                  key={`${panelId}-social`}
+                  initial={reduce ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+                  className="overflow-hidden min-[880px]:col-span-2"
+                >
+                  <QuestionGrid
+                    items={socialItems}
+                    responses={score.responses}
+                    reduce={reduce}
+                    baseIndex={econItems.length}
+                    labelOf={labelOf}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
         )}
-      </AnimatePresence>
+
+        {isMulti && otherItems.length > 0 && (
+          <>
+            <AnimatePresence initial={false}>
+              {isOpen && score && (
+                <motion.div
+                  key={`${panelId}-mixed-label`}
+                  initial={reduce ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+                  className="overflow-hidden min-[880px]:col-start-2"
+                >
+                  <span className="text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-sb-accent-hot">
+                    Mixed
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence initial={false}>
+              {isOpen && score && (
+                <motion.div
+                  key={`${panelId}-mixed-questions`}
+                  initial={reduce ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+                  className="overflow-hidden min-[880px]:col-span-2"
+                >
+                  <QuestionGrid
+                    items={otherItems}
+                    responses={score.responses}
+                    reduce={reduce}
+                    baseIndex={econItems.length + socialItems.length}
+                    labelOf={labelOf}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+
+      </div>
     </div>
   );
 }
