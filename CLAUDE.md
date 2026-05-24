@@ -12,6 +12,7 @@ Guidance for Claude Code when working in this repository.
 - **No docs / no comments** unless explicitly asked or required by a non-obvious technical reason. `MOCK:` markers are the one standing exception.
 - **Prefer deletion over preservation.** Remove obsolete code rather than wrapping it.
 - **All ports from `.env`.** Never hardcode `3000`, `5173`, etc.
+- **Naming conventions** for file and folder layout (when to split a page into a folder, the `<Page><Subitem>.tsx` "big item first" rule, barrel pattern) are in `.claude/architecture/NAMING.md`. Match the canonical `src/pages/people/` example when splitting.
 
 ## Anti-stop policy
 

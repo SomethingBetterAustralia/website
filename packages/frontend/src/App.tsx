@@ -5,7 +5,7 @@ import { Financials } from '@/pages/Financials';
 import { Home } from '@/pages/Home';
 import { Karen } from '@/pages/Karen';
 import { Open } from '@/pages/Open';
-import { People } from '@/pages/People';
+import { People } from '@/pages/people';
 import { Policies } from '@/pages/Policies';
 import { Progress } from '@/pages/Progress';
 import { Recognition } from '@/pages/Recognition';
