@@ -168,10 +168,18 @@ function BaconHeader({ reduce }: { reduce: ReduceMotion }) {
         className="max-w-[58ch] text-[1.05rem] leading-[1.6] text-sb-text"
       >
         Something Better Australia names conversations it would like to have — by description,
-        not by name — and the community uses endorsements of trusted forwards to bridge to those
-        conversations. An endorsement closes when someone in the destination&rsquo;s orbit makes
-        a warm introduction on our behalf, and the destination chooses to accept. No cold
-        messages. No mass campaigns.
+        not by name — and the community plays a game in homage to{' '}
+        <a
+          href="https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sb-text underline underline-offset-4 hover:text-sb-text"
+        >
+          Six Degrees of Kevin Bacon
+        </a>
+        , pointed somewhere useful, to bridge to those conversations. An endorsement closes when
+        someone in the destination&rsquo;s orbit makes a warm introduction on our behalf, and
+        the destination chooses to accept. No cold messages. No mass campaigns.
       </motion.p>
       <motion.div
         variants={revealUp}
@@ -409,6 +417,10 @@ function BaconLeaderboardSection({ reduce }: { reduce: ReduceMotion }) {
           The Bacon Factor
         </motion.h2>
       </motion.div>
+      <p className="mb-6 mt-2 text-sm leading-[1.6] text-sb-text-muted">
+        Named, with thanks, for Kevin Bacon — the shortest path from any forwarder to a
+        destination, counted in warm introductions.
+      </p>
       <Leaderboard />
     </section>
   );
