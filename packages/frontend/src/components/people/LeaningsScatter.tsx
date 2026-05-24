@@ -62,75 +62,72 @@ interface ScatterDotProps {
   point: ScatterPoint;
   selected: boolean;
   onSelect?: (id: string) => void;
+  onHoverChange: (id: string, hovering: boolean) => void;
   reduceMotion: boolean;
 }
 
-function ScatterDot({ point, selected, onSelect, reduceMotion }: ScatterDotProps) {
-  const [hover, setHover] = React.useState(false);
+function ScatterDot({ point, selected, onSelect, onHoverChange, reduceMotion }: ScatterDotProps) {
   const { cx, cy } = pointToPosition(point);
   const clickable = Boolean(onSelect);
   const Icon = point.icon;
   return (
-    <g>
-      <g transform={`translate(${cx} ${cy})`}>
-        <motion.g
-          whileHover={reduceMotion ? undefined : { scale: 1.4 }}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          onFocus={() => setHover(true)}
-          onBlur={() => setHover(false)}
-          onClick={onSelect ? () => onSelect(point.id) : undefined}
-          onKeyDown={
-            onSelect
-              ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelect(point.id);
-                  }
+    <g transform={`translate(${cx} ${cy})`}>
+      <motion.g
+        whileHover={reduceMotion ? undefined : { scale: 1.4 }}
+        onMouseEnter={() => onHoverChange(point.id, true)}
+        onMouseLeave={() => onHoverChange(point.id, false)}
+        onFocus={() => onHoverChange(point.id, true)}
+        onBlur={() => onHoverChange(point.id, false)}
+        onClick={onSelect ? () => onSelect(point.id) : undefined}
+        onKeyDown={
+          onSelect
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(point.id);
                 }
-              : undefined
-          }
-          tabIndex={clickable ? 0 : undefined}
-          role={clickable ? 'button' : undefined}
-          aria-label={clickable ? `${point.label}, ${point.sublabel}` : point.label}
-          className={clickable ? 'cursor-pointer focus-visible:outline-none' : undefined}
-          style={Icon ? { opacity: point.opacity } : undefined}
-        >
-          {Icon ? (
-            <>
-              <circle
-                cx={0}
-                cy={0}
-                r={11}
-                strokeWidth={1.5}
-                className="fill-sb-white stroke-sb-accent-hot"
-              />
-              <foreignObject
-                x={-7}
-                y={-7}
-                width={14}
-                height={14}
-                pointerEvents="none"
-              >
-                <div className="flex size-3.5 items-center justify-center">
-                  <Icon className="size-3.5 text-sb-accent-hot" aria-hidden />
-                </div>
-              </foreignObject>
-            </>
-          ) : selected ? (
-            <circle cx={0} cy={0} r={8} strokeWidth={2} className="fill-sb-accent stroke-sb-navy" />
-          ) : (
+              }
+            : undefined
+        }
+        tabIndex={clickable ? 0 : undefined}
+        role={clickable ? 'button' : undefined}
+        aria-label={clickable ? `${point.label}, ${point.sublabel}` : point.label}
+        className={clickable ? 'cursor-pointer focus-visible:outline-none' : undefined}
+        style={Icon ? { opacity: point.opacity } : undefined}
+      >
+        {Icon ? (
+          <>
             <circle
               cx={0}
               cy={0}
-              r={6}
-              fillOpacity={point.opacity}
-              className={point.leadership ? 'fill-sb-navy' : 'fill-sb-accent-hot'}
+              r={11}
+              strokeWidth={1.5}
+              className="fill-sb-white stroke-sb-accent-hot"
             />
-          )}
-        </motion.g>
-      </g>
-      {hover && <Tooltip cx={cx} cy={cy} point={point} />}
+            <foreignObject
+              x={-7}
+              y={-7}
+              width={14}
+              height={14}
+              pointerEvents="none"
+            >
+              <div className="flex size-3.5 items-center justify-center">
+                <Icon className="size-3.5 text-sb-accent-hot" aria-hidden />
+              </div>
+            </foreignObject>
+          </>
+        ) : selected ? (
+          <circle cx={0} cy={0} r={8} strokeWidth={2} className="fill-sb-accent stroke-sb-navy" />
+        ) : (
+          <circle
+            cx={0}
+            cy={0}
+            r={6}
+            fillOpacity={point.opacity}
+            className={point.leadership ? 'fill-sb-navy' : 'fill-sb-accent-hot'}
+          />
+        )}
+      </motion.g>
     </g>
   );
 }
@@ -187,6 +184,11 @@ export function LeaningsScatter({
 }: LeaningsScatterProps) {
   const reduce = useReducedMotion() ?? false;
   const selected = points.find((p) => p.id === selectedPointId);
+  const [hoverId, setHoverId] = React.useState<string | null>(null);
+  const hovered = hoverId ? points.find((p) => p.id === hoverId) : undefined;
+  const handleHoverChange = React.useCallback((id: string, hovering: boolean) => {
+    setHoverId((cur) => (hovering ? id : cur === id ? null : cur));
+  }, []);
   return (
     <svg
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
@@ -264,6 +266,7 @@ export function LeaningsScatter({
             point={point}
             selected={false}
             onSelect={onSelectPoint}
+            onHoverChange={handleHoverChange}
             reduceMotion={reduce}
           />
         ),
@@ -275,11 +278,16 @@ export function LeaningsScatter({
             point={selected}
             selected
             onSelect={onSelectPoint}
+            onHoverChange={handleHoverChange}
             reduceMotion={reduce}
           />
           <SelectedLabel point={selected} />
         </>
       )}
+      {hovered && (() => {
+        const { cx, cy } = pointToPosition(hovered);
+        return <Tooltip cx={cx} cy={cy} point={hovered} />;
+      })()}
     </svg>
   );
 }

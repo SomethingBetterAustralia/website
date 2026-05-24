@@ -1,9 +1,8 @@
-// MOCK: stand-in member profiles with hand-picked anchor positions and
-// procedurally-generated per-portfolio responses. Uses a fixed PRNG seed so the
-// same scores appear across dev restarts. Replace once real survey
-// submissions exist. Per-member economicAxis / socialAxis are derived via
-// scoreSummaryAxis from the synthetic responses, so the data is internally
-// consistent with the scoring contract.
+// MOCK: procedurally-generated member set. Hand-picked anchor positions feed a
+// seeded PRNG that fills per-portfolio responses; economicAxis / socialAxis are
+// derived via scoreSummaryAxis so the data is consistent with the scoring
+// contract. Flip USE_HARDCODED_RESPONSES in mock-members.ts to swap in the
+// hand-typed dataset.
 
 import type {
   PortfolioResponses,
@@ -277,4 +276,4 @@ function generateAllMembers(): readonly MemberProfile[] {
   return members;
 }
 
-export const MOCK_MEMBERS: readonly MemberProfile[] = generateAllMembers();
+export const GENERATED_MEMBERS: readonly MemberProfile[] = generateAllMembers();
