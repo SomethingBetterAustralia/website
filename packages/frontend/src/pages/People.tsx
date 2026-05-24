@@ -1,4 +1,14 @@
-import { AlertTriangle, ArrowLeft, Bell, ClipboardList, RotateCw, Users, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Bell,
+  ChevronDown,
+  ClipboardList,
+  Columns2,
+  RotateCw,
+  Users,
+  X,
+} from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 import type { PortfolioScore, MemberProfile, PeopleResponse } from '@backend/types/people';
@@ -83,13 +93,27 @@ function PeopleHeader({ reduce }: { reduce: boolean }) {
       variants={staggerContainer}
       className="flex w-full flex-col items-start gap-5"
     >
-      <motion.span
-        variants={revealUp}
-        className="inline-flex items-center gap-2 text-sb-accent-hot"
-      >
-        <Users aria-hidden className="size-4" />
-        <span className="text-xs font-semibold uppercase tracking-[0.22em]">People</span>
-      </motion.span>
+      <PeopleEyebrow />
+      <PeopleHeaderBody />
+    </motion.header>
+  );
+}
+
+function PeopleEyebrow() {
+  return (
+    <motion.span
+      variants={revealUp}
+      className="inline-flex items-center gap-2 text-sb-accent-hot"
+    >
+      <Users aria-hidden className="size-4" />
+      <span className="text-xs font-semibold uppercase tracking-[0.22em]">People</span>
+    </motion.span>
+  );
+}
+
+function PeopleHeaderBody() {
+  return (
+    <>
       <motion.h1
         variants={revealUp}
         className="font-display text-[clamp(2.8rem,6.5vw,4.6rem)] font-medium italic leading-[1.02] tracking-[-0.05em] text-sb-accent"
@@ -113,7 +137,7 @@ function PeopleHeader({ reduce }: { reduce: boolean }) {
         them around a kitchen table — and that is exactly the point. Below is where each of us sits
         across the major policy portfolios. Click anyone to see the detail.
       </motion.p>
-    </motion.header>
+    </>
   );
 }
 
@@ -195,11 +219,142 @@ function Visualisation({
   portfolios: Portfolios;
   reduce: boolean;
 }) {
-  const [toggle, setToggle] = React.useState<ToggleKey>('leadership');
-  const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
-  const [selectedPortfolioId, setSelectedPortfolioId] = React.useState<string | undefined>(undefined);
+  const [comparisonMode, setComparisonMode] = React.useState(false);
+
+  const [rightToggle, setRightToggle] = React.useState<ToggleKey>('leadership');
+  const [rightSelectedId, setRightSelectedId] = React.useState<string | undefined>(undefined);
+  const [rightSelectedPortfolioId, setRightSelectedPortfolioId] = React.useState<
+    string | undefined
+  >(undefined);
+
+  const [leftToggle, setLeftToggle] = React.useState<ToggleKey>('members');
+  const [leftSelectedId, setLeftSelectedId] = React.useState<string | undefined>(undefined);
+  const [leftSelectedPortfolioId, setLeftSelectedPortfolioId] = React.useState<
+    string | undefined
+  >(undefined);
+
   const detailRef = React.useRef<HTMLDivElement | null>(null);
 
+  const rightSelectedMember = React.useMemo(
+    () => (rightSelectedId ? members.find((m) => m.id === rightSelectedId) : undefined),
+    [rightSelectedId, members],
+  );
+
+  function toggleComparison() {
+    setComparisonMode((m) => !m);
+  }
+
+  function handleRightMemberClicked() {
+    if (comparisonMode) return;
+    requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({
+        behavior: reduce ? 'auto' : 'smooth',
+        block: 'start',
+      });
+    });
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
+        <motion.div
+          initial={reduce ? false : 'hidden'}
+          animate="visible"
+          variants={staggerContainer}
+          className="flex w-full flex-col items-start gap-5"
+        >
+          <PeopleEyebrow />
+          {comparisonMode ? (
+            <ChartCard
+              key="left"
+              members={members}
+              portfolios={portfolios}
+              reduce={reduce}
+              toggle={leftToggle}
+              setToggle={setLeftToggle}
+              selectedId={leftSelectedId}
+              setSelectedId={setLeftSelectedId}
+              selectedPortfolioId={leftSelectedPortfolioId}
+              setSelectedPortfolioId={setLeftSelectedPortfolioId}
+              comparisonActive
+              onToggleComparison={toggleComparison}
+              topOffset={false}
+            />
+          ) : (
+            <PeopleHeaderBody />
+          )}
+        </motion.div>
+        <ChartCard
+          key="right"
+          members={members}
+          portfolios={portfolios}
+          reduce={reduce}
+          toggle={rightToggle}
+          setToggle={setRightToggle}
+          selectedId={rightSelectedId}
+          setSelectedId={setRightSelectedId}
+          selectedPortfolioId={rightSelectedPortfolioId}
+          setSelectedPortfolioId={setRightSelectedPortfolioId}
+          comparisonActive={comparisonMode}
+          onToggleComparison={toggleComparison}
+          topOffset
+          onMemberClicked={handleRightMemberClicked}
+        />
+      </div>
+      <div ref={detailRef} className="mt-8 min-[880px]:mt-10">
+        <AnimatePresence initial={false}>
+          {!comparisonMode && rightSelectedMember && (
+            <motion.section
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="overflow-hidden"
+            >
+              <MemberDetail
+                member={rightSelectedMember}
+                portfolios={portfolios}
+                onClear={() => setRightSelectedId(undefined)}
+              />
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
+  );
+}
+
+interface ChartCardProps {
+  members: Members;
+  portfolios: Portfolios;
+  reduce: boolean;
+  toggle: ToggleKey;
+  setToggle: (next: ToggleKey) => void;
+  selectedId: string | undefined;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  selectedPortfolioId: string | undefined;
+  setSelectedPortfolioId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  comparisonActive: boolean;
+  onToggleComparison: () => void;
+  topOffset: boolean;
+  onMemberClicked?: () => void;
+}
+
+function ChartCard({
+  members,
+  portfolios,
+  reduce,
+  toggle,
+  setToggle,
+  selectedId,
+  setSelectedId,
+  selectedPortfolioId,
+  setSelectedPortfolioId,
+  comparisonActive,
+  onToggleComparison,
+  topOffset,
+  onMemberClicked,
+}: ChartCardProps) {
   const counts = React.useMemo(() => {
     const leadership = members.filter((m) => m.isLeadership).length;
     return {
@@ -273,12 +428,7 @@ function Visualisation({
 
   function handleSelectMember(id: string) {
     setSelectedId(id);
-    requestAnimationFrame(() => {
-      detailRef.current?.scrollIntoView({
-        behavior: reduce ? 'auto' : 'smooth',
-        block: 'start',
-      });
-    });
+    onMemberClicked?.();
   }
 
   function handleToggleChange(next: ToggleKey) {
@@ -291,27 +441,39 @@ function Visualisation({
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-10 min-[880px]:grid-cols-2 min-[880px]:items-start min-[880px]:gap-12">
-        <PeopleHeader reduce={reduce} />
-        <div className="rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:mt-9 min-[880px]:p-8">
-          <div className="flex min-h-[2.75rem] items-center">
-            {portfolioMode && selectedMember ? (
-              <div className="flex w-full items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(undefined)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sb-cream-warm px-3 py-1.5 text-sm font-medium text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
-                >
-                  <ArrowLeft aria-hidden className="size-4" />
-                  All members
-                </button>
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="min-w-0 text-right">
-                    <p className="truncate font-display text-sm font-medium text-sb-navy">
-                      {selectedMember.name}
-                    </p>
-                    <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
+    <div
+      className={cn(
+        'rounded-3xl bg-sb-white p-6 shadow-[0_12px_30px_rgba(8,31,52,0.08)] ring-1 ring-sb-cream-warm min-[880px]:p-8',
+        topOffset && 'min-[880px]:mt-9',
+      )}
+    >
+      <div className="flex min-h-[2.75rem] items-center">
+        {portfolioMode && selectedMember ? (
+          <div className="flex w-full items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedId(undefined)}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sb-cream-warm px-3 py-1.5 text-sm font-medium text-sb-navy transition-colors hover:bg-sb-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+              >
+                <ArrowLeft aria-hidden className="size-4" />
+                All
+              </button>
+              <ComparisonButton active={comparisonActive} onClick={onToggleComparison} />
+            </div>
+            <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-1">
+                    <div className="min-w-0 text-right">
+                      <p className="truncate font-display text-sm font-medium text-sb-navy">
+                        {selectedMember.name}
+                      </p>
+                      <p className="truncate text-xs text-sb-text-muted">{selectedMember.role}</p>
+                    </div>
+                    <MemberPicker
+                      members={members}
+                      currentId={selectedMember.id}
+                      onSelect={setSelectedId}
+                    />
                   </div>
                   {selectedPortfolio &&
                     (() => {
@@ -338,12 +500,15 @@ function Visualisation({
               </div>
             ) : (
               <div className="flex w-full items-center justify-between gap-3">
-                <Toggle
-                  current={toggle}
-                  counts={counts}
-                  onChange={handleToggleChange}
-                  reduce={reduce}
-                />
+                <div className="flex items-center gap-2">
+                  <Toggle
+                    current={toggle}
+                    counts={counts}
+                    onChange={handleToggleChange}
+                    reduce={reduce}
+                  />
+                  <ComparisonButton active={comparisonActive} onClick={onToggleComparison} />
+                </div>
                 {selectedPortfolio &&
                   (() => {
                     const Icon = PORTFOLIO_ICONS[selectedPortfolio.id];
@@ -436,27 +601,158 @@ function Visualisation({
             </p>
           )}
         </div>
-      </div>
-      <div ref={detailRef} className="mt-8 min-[880px]:mt-10">
-        <AnimatePresence initial={false}>
-          {selectedMember && (
-            <motion.section
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="overflow-hidden"
-            >
-              <MemberDetail
-                member={selectedMember}
-                portfolios={portfolios}
-                onClear={() => setSelectedId(undefined)}
-              />
-            </motion.section>
+  );
+}
+
+function MemberPicker({
+  members,
+  currentId,
+  onSelect,
+}: {
+  members: Members;
+  currentId: string;
+  onSelect: (id: string) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState('');
+  const wrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
+  React.useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => inputRef.current?.focus());
+    } else {
+      setQuery('');
+    }
+  }, [open]);
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const others = members.filter((m) => m.id !== currentId);
+    const sorted = [...others].sort((a, b) => {
+      if (a.isLeadership !== b.isLeadership) return a.isLeadership ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    if (!q) return sorted;
+    return sorted.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.role.toLowerCase().includes(q) ||
+        m.background.toLowerCase().includes(q),
+    );
+  }, [members, currentId, query]);
+
+  function handleSelect(id: string) {
+    onSelect(id);
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Switch to another member"
+        aria-expanded={open}
+        className="inline-flex size-6 items-center justify-center text-sb-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+      >
+        <ChevronDown
+          aria-hidden
+          className={cn('size-4 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-20 mt-1 flex w-72 flex-col gap-2 rounded-2xl bg-sb-white p-3 shadow-[0_18px_40px_rgba(8,31,52,0.18)] ring-1 ring-sb-cream-warm">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search by name, role, or background"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full rounded-md border-0 bg-sb-cream-warm/50 px-3 py-2 text-sm text-sb-navy placeholder:text-sb-text-muted focus:bg-sb-cream-warm focus:outline-none focus:ring-2 focus:ring-sb-accent"
+          />
+          {filtered.length === 0 ? (
+            <p className="px-2 py-3 text-center text-xs italic text-sb-text-muted">
+              No matches
+            </p>
+          ) : (
+            <ul role="list" className="m-0 flex max-h-72 list-none flex-col gap-0.5 overflow-y-auto p-0">
+              {filtered.map((m) => (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(m.id)}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-sb-cream-warm focus-visible:bg-sb-cream-warm focus-visible:outline-none"
+                  >
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-display text-sm font-medium text-sb-navy">
+                        {m.name}
+                      </span>
+                      <span className="truncate text-xs text-sb-text-muted">{m.role}</span>
+                    </div>
+                    {m.isLeadership && (
+                      <span className="shrink-0 rounded-full bg-sb-accent/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.15em] text-sb-accent-hot">
+                        Helm
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
-        </AnimatePresence>
-      </div>
-    </>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ComparisonButton({ active, onClick }: { active: boolean; onClick: () => void }) {
+  const label = active ? 'Exit comparison' : 'Compare';
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        aria-pressed={active}
+        className={cn(
+          'peer inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+          active
+            ? 'bg-sb-accent-hot text-sb-white hover:bg-sb-accent'
+            : 'bg-sb-cream-warm text-sb-navy hover:bg-sb-cream',
+        )}
+      >
+        {active ? (
+          <X aria-hidden className="size-4" />
+        ) : (
+          <Columns2 aria-hidden className="size-4" />
+        )}
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+      >
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -472,7 +768,7 @@ function Toggle({
   reduce: boolean;
 }) {
   const items: ReadonlyArray<{ key: ToggleKey; label: string; count: number }> = [
-    { key: 'leadership', label: 'Leadership', count: counts.leadership },
+    { key: 'leadership', label: 'Helm', count: counts.leadership },
     { key: 'members', label: 'Members', count: counts.members },
     { key: 'all', label: 'All', count: counts.all },
   ];
@@ -493,7 +789,7 @@ function Toggle({
             onClick={() => onChange(item.key)}
             whileTap={reduce ? undefined : { scale: 0.97 }}
             className={cn(
-              'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors min-[880px]:px-4 min-[880px]:py-2',
+              'inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition-colors min-[880px]:px-4 min-[880px]:py-1.5',
               active ? 'bg-sb-navy text-sb-cream' : 'text-sb-text-muted hover:bg-sb-cream',
             )}
           >
