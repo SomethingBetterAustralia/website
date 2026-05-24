@@ -1,15 +1,15 @@
 import type { ReactElement } from 'react';
-import { BaconBoard } from '@/pages/BaconBoard';
-import { Donate } from '@/pages/Donate';
-import { Financials } from '@/pages/Financials';
-import { Home } from '@/pages/Home';
-import { Karen } from '@/pages/Karen';
-import { Open } from '@/pages/Open';
+import { BaconBoard } from '@/pages/baconboard';
+import { Donate } from '@/pages/donate';
+import { Financials } from '@/pages/financials';
+import { Home } from '@/pages/home';
+import { Karen } from '@/pages/karen';
+import { Open } from '@/pages/open';
 import { People } from '@/pages/people';
-import { Policies } from '@/pages/Policies';
-import { Progress } from '@/pages/Progress';
-import { Recognition } from '@/pages/Recognition';
-import { Survey } from '@/pages/Survey';
+import { Policies } from '@/pages/policies';
+import { Progress } from '@/pages/progress';
+import { Recognition } from '@/pages/recognition';
+import { Survey } from '@/pages/survey';
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { RouterProvider, useRoute, type Route } from '@/lib/router';
 

@@ -1,0 +1,1 @@
+export { BaconBoard } from './BaconBoard';
