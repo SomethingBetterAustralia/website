@@ -52,54 +52,255 @@ interface Identity {
   readonly name: string;
   readonly role: string;
   readonly background: string;
+  readonly bioShort: string;
+  readonly bioLong: string;
+  readonly location: string;
+  readonly focusAreas: readonly string[];
+  readonly joined: string;
+  readonly photoUrl: string;
 }
 
 const IDENTITIES: readonly Identity[] = [
-  { id: 'm-001', name: 'Eleni Marchetti', role: 'Founder', background: 'Former public-policy lead, Sydney' },
-  { id: 'm-002', name: 'Daniel Karpinski', role: 'Co-chair', background: 'Climate scientist, Melbourne' },
-  { id: 'm-003', name: 'Yvette Karangi', role: 'Policy lead (economy)', background: 'Macro-economist, ANU' },
-  { id: 'm-004', name: 'Hamish Treadwell', role: 'Policy lead (climate)', background: 'Energy systems engineer' },
-  { id: 'm-005', name: 'Priya Lakhani', role: 'Policy lead (social)', background: 'Public-health physician' },
-  { id: 'm-006', name: 'Bruno Cardoso', role: 'Policy lead (defence)', background: 'Retired RAAF officer' },
-  { id: 'm-007', name: 'Margot Linden', role: 'Treasurer', background: 'Chartered accountant, Brisbane' },
-  { id: 'm-008', name: 'Liam Whitcombe', role: 'Secretary', background: 'Corporate-law associate' },
-  { id: 'm-009', name: 'Anita Coatsworth', role: 'Membership director', background: 'Community organiser, regional VIC' },
-  { id: 'm-010', name: 'Theo Vassilakis', role: 'Communications lead', background: 'Former ABC producer' },
-  { id: 'm-011', name: 'Renee Holborow', role: 'Policy lead (health)', background: 'Aged-care consultant' },
-  { id: 'm-012', name: 'Toby Quintrell', role: 'Policy lead (education)', background: 'Maths teacher and curriculum designer' },
-  { id: 'm-043', name: 'Yusuf Belir', role: 'Policy lead (industry & trade)', background: 'Former Productivity Commission economist, Sydney' },
-  { id: 'm-044', name: 'Tania Rourke', role: 'Policy lead (agriculture & regions)', background: 'Farm-business consultant, Wagga Wagga' },
-  { id: 'm-045', name: 'Nina Whitlam', role: 'Policy lead (technology & digital)', background: 'Cybersecurity researcher, Canberra' },
-  { id: 'm-013', name: 'Sarah Cavendish', role: 'Member', background: 'GP in regional NSW' },
-  { id: 'm-014', name: 'Marcus Penberthy', role: 'Member', background: 'Software engineer, Adelaide' },
-  { id: 'm-015', name: 'Aroha Sutherland', role: 'Member', background: 'Primary-school teacher' },
-  { id: 'm-016', name: 'Jin Park', role: 'Member', background: 'Small-business owner (hospitality)' },
-  { id: 'm-017', name: 'Catherine Rowe', role: 'Member', background: 'Retired army officer' },
-  { id: 'm-018', name: 'Felix Donnellan', role: 'Member', background: 'Social worker, outer Melbourne' },
-  { id: 'm-019', name: 'Imogen Boyce', role: 'Member', background: 'Agronomist, Riverina' },
-  { id: 'm-020', name: 'Mateo Sanchez', role: 'Member', background: 'Accountant, North Sydney' },
-  { id: 'm-021', name: 'Hannah Greengrass', role: 'Member', background: 'Critical-care nurse' },
-  { id: 'm-022', name: 'Joel Patapere', role: 'Member', background: 'Carpenter and small builder' },
-  { id: 'm-023', name: 'Olivia Trent', role: 'Member', background: 'Civil engineer (transport)' },
-  { id: 'm-024', name: 'Sam Olusoga', role: 'Member', background: 'Freelance journalist' },
-  { id: 'm-025', name: 'Penny Drewett', role: 'Member', background: 'Family lawyer' },
-  { id: 'm-026', name: 'Rajiv Bhandari', role: 'Member', background: 'Town planner' },
-  { id: 'm-027', name: 'Naomi Trevorrow', role: 'Member', background: 'University lecturer (history)' },
-  { id: 'm-028', name: 'Ben Voss', role: 'Member', background: 'Marine biologist, Hobart' },
-  { id: 'm-029', name: 'Lachlan Quirk', role: 'Member', background: 'Self-employed electrician' },
-  { id: 'm-030', name: 'Anika Saxena', role: 'Member', background: 'Paramedic' },
-  { id: 'm-031', name: 'Pia Costanzo', role: 'Member', background: 'Dentist, Perth' },
-  { id: 'm-032', name: 'Ezra Brock', role: 'Member', background: 'Café owner, Geelong' },
-  { id: 'm-033', name: 'Tessa Maguire', role: 'Member', background: 'Public librarian' },
-  { id: 'm-034', name: 'Joon-ho Kang', role: 'Member', background: 'Council planner, Western Sydney' },
-  { id: 'm-035', name: 'Owen Trist', role: 'Member', background: 'Mining engineer, WA' },
-  { id: 'm-036', name: 'Sophie Whelan', role: 'Member', background: 'Primary teacher, Darwin' },
-  { id: 'm-037', name: 'Amaru Cordova', role: 'Member', background: 'Refugee resettlement worker' },
-  { id: 'm-038', name: 'Henrik Lassiter', role: 'Member', background: 'Freight forwarder, Port Botany' },
-  { id: 'm-039', name: "Bridie O'Toole", role: 'Member', background: 'Midwife, regional QLD' },
-  { id: 'm-040', name: 'Caleb Yarrow', role: 'Member', background: 'Independent podcast producer' },
-  { id: 'm-041', name: 'Niamh Coughlan', role: 'Member', background: 'Plumber, Newcastle' },
-  { id: 'm-042', name: 'Vivian Kerr', role: 'Member', background: 'Energy market analyst' },
+  {
+    id: 'm-001',
+    name: 'Elias Marchetti',
+    role: 'Founder',
+    background: 'Former public-policy lead, Sydney',
+    location: 'Sydney NSW',
+    joined: '2026',
+    focusAreas: ['Public policy', 'Movement strategy', 'Coalition building'],
+    bioShort:
+      "Elias founded SBA after a decade in Commonwealth and NSW public-policy roles, including stints at Treasury and a cross-bench MP's office. He's convinced major-party tribalism is the binding constraint on Australia.",
+    bioLong:
+      'Elias founded Something Better Australia in early 2026 after twelve years across Commonwealth Treasury, a NSW state department, and a federal cross-bench office. He wrote his postgrad on deliberative democracy and spent the last three years inside the policy machine watching good ideas die for tribal reasons. SBA is his bet that the binding constraint on Australian governance is not talent or evidence, but the two-party dynamic itself.',
+    photoUrl: 'https://randomuser.me/api/portraits/men/40.jpg',
+  },
+  {
+    id: 'm-002',
+    name: 'Daniel Karpinski',
+    role: 'Co-chair',
+    background: 'Climate scientist, Melbourne',
+    location: 'Melbourne VIC',
+    joined: '2026',
+    focusAreas: ['Climate science', 'Energy policy', 'Public research'],
+    bioShort:
+      'Daniel is a climate scientist with a research career at CSIRO and the University of Melbourne, focused on continental-scale carbon flux. He joined SBA to bring evidence weight to energy debates.',
+    bioLong:
+      'Daniel spent fifteen years at CSIRO and the University of Melbourne working on Australian continental-scale carbon flux and bushfire-climate coupling. He has authored more than forty peer-reviewed papers and sat on two state-level advisory panels. He joined SBA as co-chair because he wants the energy and climate conversation to be governed by the published evidence, not by the news cycle.',
+    photoUrl: 'https://randomuser.me/api/portraits/men/22.jpg',
+  },
+  {
+    id: 'm-003',
+    name: 'Yvette Karangi',
+    role: 'Portfolio lead (economy)',
+    background: 'Macro-economist, ANU',
+    location: 'Canberra ACT',
+    joined: '2026',
+    focusAreas: ['Tax design', 'Fiscal policy', 'Housing economics'],
+    bioShort:
+      "Yvette is an ANU macro-economist with a focus on tax design and housing supply. She advised the Productivity Commission's last housing review.",
+    bioLong:
+      "Yvette is a senior lecturer at ANU in macroeconomics and a former senior advisor on the Productivity Commission's review of Australian housing supply. Her published work covers negative gearing, GST design, and the long-run drag of intergenerational housing wealth on labour mobility. She leads SBA's economy and tax portfolio with a brief to write policy that an honest economist can sign.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
+  },
+  {
+    id: 'm-004',
+    name: 'Hamish Treadwell',
+    role: 'Portfolio lead (climate)',
+    background: 'Energy systems engineer',
+    location: 'Brisbane QLD',
+    joined: '2026',
+    focusAreas: ['Grid engineering', 'Renewable transition', 'Storage'],
+    bioShort:
+      "Hamish is an energy-systems engineer who has spent the last decade modelling the grid for the National Electricity Market. He's spoken to every major-party energy spokesperson and walked away convinced none of them are doing the maths.",
+    bioLong:
+      "Hamish is a senior energy-systems engineer with a decade modelling the National Electricity Market's transition under different policy and technology mixes. He has built one of the most-cited NEM dispatch models in industry and consults to both generators and regulators. He leads SBA's climate and energy portfolio and is unusually willing to be specific about the cost of each option.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+  },
+  {
+    id: 'm-005',
+    name: 'Priya Lakhani',
+    role: 'Portfolio lead (social)',
+    background: 'Public-health physician',
+    location: 'Sydney NSW',
+    joined: '2026',
+    focusAreas: ['Primary care', 'Aged care', 'Public-health equity'],
+    bioShort:
+      'Priya is a public-health physician with a clinical base in Western Sydney and policy time at the World Health Organisation. She thinks Australian social policy is far too siloed by department.',
+    bioLong:
+      "Priya practices as a public-health physician in Western Sydney and previously worked at the WHO on chronic-disease policy across the Indo-Pacific. She has authored the Greater Sydney Primary Health Network's last two strategic frameworks. At SBA she leads social policy with a particular focus on the gaps between mental health, primary care, and aged care funding.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/29.jpg',
+  },
+  {
+    id: 'm-006',
+    name: 'Bruno Cardoso',
+    role: 'Portfolio lead (defence)',
+    background: 'Retired RAAF officer',
+    location: 'Canberra ACT',
+    joined: '2026',
+    focusAreas: ['Defence strategy', 'Indo-Pacific', 'Veterans'],
+    bioShort:
+      "Bruno is a retired RAAF Wing Commander with twenty-two years of service, including postings in Canberra and three operational deployments. He's a sceptic of both reflexive AUKUS support and reflexive AUKUS opposition.",
+    bioLong:
+      "Bruno retired as a RAAF Wing Commander after twenty-two years including operational deployments to the Middle East, postings to Defence headquarters in Canberra, and a secondment to the Department of Foreign Affairs and Trade. Since retiring he has consulted on Indo-Pacific posture for two parliamentary committees. He leads SBA's defence and foreign-affairs portfolio.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/55.jpg',
+  },
+  {
+    id: 'm-007',
+    name: 'Margot Linden',
+    role: 'Treasurer',
+    background: 'Chartered accountant, Brisbane',
+    location: 'Brisbane QLD',
+    joined: '2026',
+    focusAreas: ['Audit', 'Charity finance', 'Compliance'],
+    bioShort:
+      'Margot is a Chartered Accountant with twenty years in not-for-profit and political-party finance. She runs the SBA books and the financial-disclosure regime.',
+    bioLong:
+      "Margot is a Brisbane-based Chartered Accountant who spent the first decade of her career at a Big Four firm and the second running finance for two federally-registered charities and one state political party. She is SBA's Treasurer and is the person who makes sure the financials on this website match the bank account exactly. She insisted on the public ledger before agreeing to take the role.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/52.jpg',
+  },
+  {
+    id: 'm-008',
+    name: 'Liam Whitcombe',
+    role: 'Secretary',
+    background: 'Corporate-law associate',
+    location: 'Sydney NSW',
+    joined: '2026',
+    focusAreas: ['Constitutional law', 'Electoral law', 'Governance'],
+    bioShort:
+      'Liam is a corporate-law associate at a top-tier Australian firm with a side specialty in electoral and political-party law. He drafted the SBA constitution.',
+    bioLong:
+      "Liam is a senior associate at a Sydney top-tier firm whose pro bono work has covered electoral registration, donation-disclosure compliance, and two recent constitutional challenges. He drafted the SBA constitution and is the movement's Secretary. He keeps the AEC paperwork in order and the meeting minutes honest.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/12.jpg',
+  },
+  {
+    id: 'm-009',
+    name: 'Anita Coatsworth',
+    role: 'Membership director',
+    background: 'Community organiser, regional VIC',
+    location: 'Bendigo VIC',
+    joined: '2026',
+    focusAreas: ['Regional organising', 'Volunteer programs', 'Events'],
+    bioShort:
+      'Anita is a community organiser who has worked across regional Victoria for fifteen years, previously running a state-wide rural mental-health network. She runs SBA membership and outreach.',
+    bioLong:
+      "Anita is a Bendigo-based community organiser with fifteen years across regional Victoria, including eight years as program director of a state-wide rural mental-health network. She has built and trained volunteer cohorts of several hundred people. She runs SBA membership and field outreach and is the person you'll most likely meet if you sign up to volunteer.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/76.jpg',
+  },
+  {
+    id: 'm-010',
+    name: 'Theo Vassilakis',
+    role: 'Communications lead',
+    background: 'Former ABC producer',
+    location: 'Melbourne VIC',
+    joined: '2026',
+    focusAreas: ['Public broadcasting', 'Editorial', 'Plain language'],
+    bioShort:
+      "Theo is a former ABC producer with sixteen years at Radio National and 7.30. He leads SBA communications and writes most of the website copy you'll read.",
+    bioLong:
+      "Theo spent sixteen years inside the ABC, including ten years producing Radio National's flagship current-affairs program and four years on 7.30. He left in 2025 because he believes public-interest journalism in Australia has been hollowed out by both budget cuts and platform economics. He leads SBA communications, edits the site, and writes most of the public-facing copy.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/33.jpg',
+  },
+  {
+    id: 'm-011',
+    name: 'Renee Holborow',
+    role: 'Portfolio lead (health)',
+    background: 'Aged-care consultant',
+    location: 'Adelaide SA',
+    joined: '2026',
+    focusAreas: ['Aged care', 'Royal Commission response', 'Funding'],
+    bioShort:
+      'Renee is an aged-care consultant who appeared before the Royal Commission and has spent the last five years inside the implementation of its recommendations.',
+    bioLong:
+      "Renee was a senior witness at the Royal Commission into Aged Care Quality and Safety and has spent the five years since working inside aged-care providers implementing recommendations on staffing ratios, clinical governance, and funding reform. She leads SBA's healthcare and aged-care policy work and is specifically loud on the gap between policy intent and implementation.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/15.jpg',
+  },
+  {
+    id: 'm-012',
+    name: 'Toby Quintrell',
+    role: 'Portfolio lead (education)',
+    background: 'Maths teacher and curriculum designer',
+    location: 'Hobart TAS',
+    joined: '2026',
+    focusAreas: ['Curriculum design', 'Public schools', 'STEM'],
+    bioShort:
+      "Toby is a high-school maths teacher and curriculum designer who has spent his career in Tasmanian public schools. He wrote the state's current Years 7-10 maths sequence.",
+    bioLong:
+      "Toby is a Hobart-based high-school mathematics teacher and curriculum designer who has spent his entire career in Tasmanian public schools. He led the redesign of the state's Years 7-10 maths sequence in 2023 and consults to the Australian Curriculum and Assessment Authority. He leads SBA's education and research portfolio with a brief to take the politics out of school funding.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/61.jpg',
+  },
+  {
+    id: 'm-043',
+    name: 'Yusuf Belir',
+    role: 'Portfolio lead (industry & trade)',
+    background: 'Former Productivity Commission economist, Sydney',
+    location: 'Sydney NSW',
+    joined: '2026',
+    focusAreas: ['Trade policy', 'Industry assistance', 'Productivity'],
+    bioShort:
+      "Yusuf is a former Productivity Commission economist with eight years on the trade and industry-assistance desk. He's published on FTA welfare effects and critical-minerals strategy.",
+    bioLong:
+      "Yusuf spent eight years at the Productivity Commission on the trade and industry-assistance desk, including lead-economist roles on two major reviews of Australian critical-minerals strategy and one review of FTA welfare outcomes. He left for the private sector in 2024 and now leads SBA's industry and trade portfolio.",
+    photoUrl: 'https://randomuser.me/api/portraits/men/8.jpg',
+  },
+  {
+    id: 'm-044',
+    name: 'Tania Rourke',
+    role: 'Portfolio lead (agriculture & regions)',
+    background: 'Farm-business consultant, Wagga Wagga',
+    location: 'Wagga Wagga NSW',
+    joined: '2026',
+    focusAreas: ['Farm business', 'Water policy', 'Regional dev'],
+    bioShort:
+      'Tania is a Wagga-based farm-business consultant and third-generation grazier. She advises the Riverina farm community on succession, water entitlements, and climate adaptation.',
+    bioLong:
+      "Tania is a farm-business consultant working across the Riverina and a third-generation grazier on the Murrumbidgee. She advises farm families on succession planning, water-entitlement strategy under the Murray-Darling Basin Plan, and climate-adaptation investment. She leads SBA's agriculture and regions portfolio and is loud about the city / country policy gap.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/85.jpg',
+  },
+  {
+    id: 'm-045',
+    name: 'Nina Whitlam',
+    role: 'Portfolio lead (technology & digital)',
+    background: 'Cybersecurity researcher, Canberra',
+    location: 'Canberra ACT',
+    joined: '2026',
+    focusAreas: ['Cybersecurity', 'AI policy', 'Digital sovereignty'],
+    bioShort:
+      "Nina is a cybersecurity researcher at ANU with a background in critical-infrastructure protection and AI governance. She's advised both ASD and the Office of the eSafety Commissioner.",
+    bioLong:
+      "Nina is a senior researcher at ANU's cybersecurity centre with a background in critical-infrastructure protection and frontier AI safety governance. She has advised the Australian Signals Directorate, the Office of the eSafety Commissioner, and two parliamentary committees on AI legislation. She leads SBA's technology and digital portfolio.",
+    photoUrl: 'https://randomuser.me/api/portraits/women/3.jpg',
+  },
+  { id: 'm-013', name: 'Sarah Cavendish', role: 'Member', background: 'GP in regional NSW', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-014', name: 'Marcus Penberthy', role: 'Member', background: 'Software engineer, Adelaide', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-015', name: 'Aroha Sutherland', role: 'Member', background: 'Primary-school teacher', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-016', name: 'Jin Park', role: 'Member', background: 'Small-business owner (hospitality)', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-017', name: 'Catherine Rowe', role: 'Member', background: 'Retired army officer', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-018', name: 'Felix Donnellan', role: 'Member', background: 'Social worker, outer Melbourne', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-019', name: 'Imogen Boyce', role: 'Member', background: 'Agronomist, Riverina', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-020', name: 'Mateo Sanchez', role: 'Member', background: 'Accountant, North Sydney', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-021', name: 'Hannah Greengrass', role: 'Member', background: 'Critical-care nurse', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-022', name: 'Joel Patapere', role: 'Member', background: 'Carpenter and small builder', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-023', name: 'Olivia Trent', role: 'Member', background: 'Civil engineer (transport)', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-024', name: 'Sam Olusoga', role: 'Member', background: 'Freelance journalist', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-025', name: 'Penny Drewett', role: 'Member', background: 'Family lawyer', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-026', name: 'Rajiv Bhandari', role: 'Member', background: 'Town planner', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-027', name: 'Naomi Trevorrow', role: 'Member', background: 'University lecturer (history)', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-028', name: 'Ben Voss', role: 'Member', background: 'Marine biologist, Hobart', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-029', name: 'Lachlan Quirk', role: 'Member', background: 'Self-employed electrician', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-030', name: 'Anika Saxena', role: 'Member', background: 'Paramedic', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-031', name: 'Pia Costanzo', role: 'Member', background: 'Dentist, Perth', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-032', name: 'Ezra Brock', role: 'Member', background: 'Café owner, Geelong', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-033', name: 'Tessa Maguire', role: 'Member', background: 'Public librarian', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-034', name: 'Joon-ho Kang', role: 'Member', background: 'Council planner, Western Sydney', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-035', name: 'Owen Trist', role: 'Member', background: 'Mining engineer, WA', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-036', name: 'Sophie Whelan', role: 'Member', background: 'Primary teacher, Darwin', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-037', name: 'Amaru Cordova', role: 'Member', background: 'Refugee resettlement worker', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-038', name: 'Henrik Lassiter', role: 'Member', background: 'Freight forwarder, Port Botany', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-039', name: "Bridie O'Toole", role: 'Member', background: 'Midwife, regional QLD', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-040', name: 'Caleb Yarrow', role: 'Member', background: 'Independent podcast producer', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-041', name: 'Niamh Coughlan', role: 'Member', background: 'Plumber, Newcastle', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
+  { id: 'm-042', name: 'Vivian Kerr', role: 'Member', background: 'Energy market analyst', location: '', joined: '', focusAreas: [], bioShort: '', bioLong: '', photoUrl: '' },
 ];
 
 const NULL_PROB_BY_EXPERTISE: Record<1 | 2 | 3 | 4 | 5, number> = {
@@ -228,6 +429,12 @@ function generateMember(
     economicAxis,
     socialAxis,
     portfolioScores,
+    bioShort: identity.bioShort,
+    bioLong: identity.bioLong,
+    location: identity.location,
+    focusAreas: identity.focusAreas,
+    joined: identity.joined,
+    photoUrl: identity.photoUrl,
     _isMock: true,
   };
 }

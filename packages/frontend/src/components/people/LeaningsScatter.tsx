@@ -1,6 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
+import type { MemberProfile } from '@backend/types/people';
+import { LeadershipBioCard } from './LeadershipBioCard';
 import { scoreToNormalised } from './leanings-math';
 
 export interface ScatterPoint {
@@ -18,7 +20,12 @@ export interface LeaningsScatterProps {
   points: readonly ScatterPoint[];
   selectedPointId?: string;
   onSelectPoint?: (id: string) => void;
+  members?: readonly MemberProfile[];
 }
+
+const BIO_CARD_WIDTH = 280;
+const BIO_CARD_HEIGHT_ESTIMATE = 200;
+const BIO_CARD_GAP = 12;
 
 // 400×300 viewBox; 24px outer margin reserved for axis labels.
 const VIEW_W = 400;
@@ -181,21 +188,77 @@ export function LeaningsScatter({
   points,
   selectedPointId,
   onSelectPoint,
+  members,
 }: LeaningsScatterProps) {
   const reduce = useReducedMotion() ?? false;
   const selected = points.find((p) => p.id === selectedPointId);
   const [hoverId, setHoverId] = React.useState<string | null>(null);
   const hovered = hoverId ? points.find((p) => p.id === hoverId) : undefined;
-  const handleHoverChange = React.useCallback((id: string, hovering: boolean) => {
-    setHoverId((cur) => (hovering ? id : cur === id ? null : cur));
+
+  const closeTimerRef = React.useRef<number | null>(null);
+  const cancelClose = React.useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
   }, []);
+  const scheduleClose = React.useCallback((id: string) => {
+    cancelClose();
+    closeTimerRef.current = window.setTimeout(() => {
+      setHoverId((cur) => (cur === id ? null : cur));
+      closeTimerRef.current = null;
+    }, 150);
+  }, [cancelClose]);
+  React.useEffect(() => () => cancelClose(), [cancelClose]);
+
+  const handleHoverChange = React.useCallback(
+    (id: string, hovering: boolean) => {
+      if (hovering) {
+        cancelClose();
+        setHoverId(id);
+      } else {
+        scheduleClose(id);
+      }
+    },
+    [cancelClose, scheduleClose],
+  );
+
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const svgRef = React.useRef<SVGSVGElement | null>(null);
+  const [overlay, setOverlay] = React.useState<{ left: number; top: number } | null>(null);
+  const hoveredMember =
+    hovered?.leadership && members ? members.find((m) => m.id === hovered.id) : undefined;
+
+  React.useLayoutEffect(() => {
+    if (!hoveredMember || !svgRef.current || !containerRef.current) {
+      setOverlay(null);
+      return;
+    }
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const { cx, cy } = pointToPosition(hovered as ScatterPoint);
+    const pxX = (cx / VIEW_W) * svgRect.width + (svgRect.left - containerRect.left);
+    const pxY = (cy / VIEW_H) * svgRect.height + (svgRect.top - containerRect.top);
+    let left = pxX + BIO_CARD_GAP;
+    if (left + BIO_CARD_WIDTH + BIO_CARD_GAP > containerRect.width) {
+      left = pxX - BIO_CARD_GAP - BIO_CARD_WIDTH;
+    }
+    let top = pxY + BIO_CARD_GAP;
+    if (top + BIO_CARD_HEIGHT_ESTIMATE + BIO_CARD_GAP > containerRect.height) {
+      top = pxY - BIO_CARD_GAP - BIO_CARD_HEIGHT_ESTIMATE;
+    }
+    setOverlay({ left, top });
+  }, [hoveredMember, hovered]);
+
   return (
-    <svg
-      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-      className="h-auto w-full"
-      role="img"
-      aria-label="Member leanings scatter"
-    >
+    <div ref={containerRef} className="relative">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+        className="h-auto w-full"
+        role="img"
+        aria-label="Member leanings scatter"
+      >
       <defs>
         <radialGradient id="leanings-bg" cx="50%" cy="50%" r="60%">
           <stop offset="0%" stopColor="var(--color-sb-cream-warm)" />
@@ -284,10 +347,23 @@ export function LeaningsScatter({
           <SelectedLabel point={selected} />
         </>
       )}
-      {hovered && (() => {
+      {hovered && !hovered.leadership && (() => {
         const { cx, cy } = pointToPosition(hovered);
         return <Tooltip cx={cx} cy={cy} point={hovered} />;
       })()}
-    </svg>
+      </svg>
+      {hoveredMember && overlay && (
+        <button
+          type="button"
+          className="absolute z-20 hidden cursor-pointer rounded-2xl text-left min-[880px]:block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent"
+          style={{ left: overlay.left, top: overlay.top }}
+          onMouseEnter={cancelClose}
+          onMouseLeave={() => scheduleClose(hoveredMember.id)}
+          onClick={onSelectPoint ? () => onSelectPoint(hoveredMember.id) : undefined}
+        >
+          <LeadershipBioCard member={hoveredMember} />
+        </button>
+      )}
+    </div>
   );
 }

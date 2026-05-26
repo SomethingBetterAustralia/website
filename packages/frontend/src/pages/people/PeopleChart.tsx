@@ -1,9 +1,10 @@
-import { ArrowLeft, ChevronDown, Columns2, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Columns2, ShipWheel, User, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import {
   LeaningsScatter,
   PORTFOLIO_ICONS,
+  PortfolioHelmGrid,
   expertiseToOpacity,
   type ScatterPoint,
 } from '@/components/people';
@@ -49,6 +50,11 @@ export function PeopleChart({
     [rightSelectedId, members],
   );
 
+  const leadership = React.useMemo(
+    () => members.filter((m) => m.isLeadership),
+    [members],
+  );
+
   function toggleComparison() {
     setComparisonMode((m) => !m);
   }
@@ -61,6 +67,11 @@ export function PeopleChart({
         block: 'start',
       });
     });
+  }
+
+  function handleHelmSelect(id: string) {
+    setRightSelectedId(id);
+    handleRightMemberClicked();
   }
 
   return (
@@ -107,27 +118,73 @@ export function PeopleChart({
           comparisonActive={comparisonMode}
           onToggleComparison={toggleComparison}
           topOffset
-          onMemberClicked={handleRightMemberClicked}
         />
       </div>
-      <div ref={detailRef} className="mt-8 min-[880px]:mt-10">
-        <AnimatePresence initial={false}>
-          {!comparisonMode && rightSelectedMember && (
-            <motion.section
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="overflow-hidden"
-            >
-              <PeopleMemberDetail
-                member={rightSelectedMember}
-                portfolios={portfolios}
-                onClear={() => setRightSelectedId(undefined)}
-              />
-            </motion.section>
-          )}
-        </AnimatePresence>
+      <div ref={detailRef} className="mt-8 scroll-mt-24 min-[880px]:mt-10">
+        {!comparisonMode && (() => {
+          const showMemberHeader = Boolean(
+            rightSelectedMember && !rightSelectedMember.isLeadership,
+          );
+          const SectionIcon = showMemberHeader ? User : ShipWheel;
+          const eyebrowText = showMemberHeader ? 'Member' : 'Leadership';
+          const sectionTitle = showMemberHeader ? 'Member profile' : 'Our Portfolio Helm';
+          const sectionDescription = rightSelectedMember
+            ? `Below is ${rightSelectedMember.name}'s bio and survey portfolio breakdown. Click Clear to return to the team.`
+            : 'Click anyone to see their bio and survey portfolio breakdown.';
+          return (
+          <section aria-labelledby="portfolio-helm-heading">
+            <div className="mb-8 flex flex-col gap-2">
+              <span className="inline-flex items-center gap-2 text-sb-accent-hot">
+                <SectionIcon aria-hidden className="size-4" />
+                <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+                  {eyebrowText}
+                </span>
+              </span>
+              <h2
+                id="portfolio-helm-heading"
+                className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
+              >
+                {sectionTitle}
+              </h2>
+              <p className="text-sm leading-[1.6] text-sb-text-muted min-[880px]:text-base">
+                {sectionDescription}
+              </p>
+            </div>
+            <AnimatePresence initial={false} mode="wait">
+              {rightSelectedMember ? (
+                <motion.div
+                  key="detail"
+                  initial={reduce ? false : { height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <PeopleMemberDetail
+                    member={rightSelectedMember}
+                    portfolios={portfolios}
+                    onClear={() => setRightSelectedId(undefined)}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="grid"
+                  initial={reduce ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={reduce ? { opacity: 0 } : { opacity: 0 }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
+                >
+                  <PortfolioHelmGrid
+                    leaders={leadership}
+                    onSelect={handleHelmSelect}
+                    reduce={reduce}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
+          );
+        })()}
       </div>
     </>
   );
@@ -346,6 +403,7 @@ function ChartCard({
           points={points}
           selectedPointId={portfolioMode ? undefined : selectedId}
           onSelectPoint={portfolioMode ? undefined : handleSelectMember}
+          members={members}
         />
       </div>
       {selectedMember && selectedPortfolio ? (

@@ -18,6 +18,12 @@ export interface MemberProfile {
   readonly economicAxis: number;
   readonly socialAxis: number;
   readonly portfolioScores: readonly PortfolioScore[];
+  readonly bioShort: string;
+  readonly bioLong: string;
+  readonly location: string;
+  readonly focusAreas: readonly string[];
+  readonly joined: string;
+  readonly photoUrl: string;
   readonly _isMock: true;
 }
 

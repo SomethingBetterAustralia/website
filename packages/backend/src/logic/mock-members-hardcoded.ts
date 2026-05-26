@@ -64,6 +64,12 @@ function toMemberProfile(submission: HardcodedSubmission): MemberProfile {
     economicAxis,
     socialAxis,
     portfolioScores,
+    bioShort: '',
+    bioLong: '',
+    location: '',
+    focusAreas: [],
+    joined: '',
+    photoUrl: '',
     _isMock: true,
   };
 }
