@@ -122,7 +122,7 @@ export function PeopleChart({
         />
       </div>
       <div ref={detailRef} className="mt-8 scroll-mt-24 min-[880px]:mt-10">
-        {!comparisonMode && (() => {
+        {(() => {
           const showMemberHeader = Boolean(
             rightSelectedMember && !rightSelectedMember.isLeadership,
           );
@@ -251,6 +251,8 @@ function ChartCard({
     () => (selectedPortfolioId ? portfolios.find((d) => d.id === selectedPortfolioId) : undefined),
     [selectedPortfolioId, portfolios],
   );
+
+  const [hoveredFilterId, setHoveredFilterId] = React.useState<string | null>(null);
 
   const portfolioMode = Boolean(selectedMember);
 
@@ -383,10 +385,18 @@ function ChartCard({
               <button
                 type="button"
                 onClick={() => handleTogglePortfolio(d.id)}
+                onMouseEnter={() => setHoveredFilterId(d.id)}
+                onMouseLeave={() =>
+                  setHoveredFilterId((c) => (c === d.id ? null : c))
+                }
+                onFocus={() => setHoveredFilterId(d.id)}
+                onBlur={() =>
+                  setHoveredFilterId((c) => (c === d.id ? null : c))
+                }
                 aria-label={`Filter by ${d.name}`}
                 aria-pressed={isActive}
                 className={cn(
-                  'peer inline-flex size-6 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
+                  'inline-flex size-6 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sb-accent',
                   isActive
                     ? 'bg-sb-accent-hot text-sb-white'
                     : 'text-sb-accent-hot hover:text-sb-navy',
@@ -396,7 +406,10 @@ function ChartCard({
               </button>
               <span
                 role="tooltip"
-                className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy opacity-0 shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150 peer-hover:opacity-100 peer-focus-visible:opacity-100"
+                className={cn(
+                  'pointer-events-none absolute left-1/2 top-full z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-sb-white px-2 py-1 font-display text-[0.72rem] text-sb-navy shadow-[0_4px_12px_rgba(8,31,52,0.12)] ring-1 ring-sb-cream-warm transition-opacity duration-150',
+                  hoveredFilterId === d.id ? 'opacity-100' : 'opacity-0',
+                )}
               >
                 {d.name}
               </span>
@@ -422,8 +435,8 @@ function ChartCard({
         <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
           Each dot is one policy portfolio for{' '}
           <span className="font-medium text-sb-navy">{selectedMember.name}</span>. The spread
-          across quadrants shows that a single person doesn&rsquo;t fit one party. They lean one
-          way on some issues, another on others.
+          shows a single person doesn&rsquo;t fit one party &mdash; they lean different ways on
+          different issues.
         </p>
       ) : selectedPortfolio ? (
         <p className="mt-4 text-xs leading-[1.6] text-sb-text-muted min-[880px]:text-sm">
