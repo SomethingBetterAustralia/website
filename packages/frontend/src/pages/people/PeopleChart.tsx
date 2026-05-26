@@ -2,6 +2,7 @@ import { ArrowLeft, ChevronDown, Columns2, ShipWheel, User, X } from 'lucide-rea
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import {
+  FindMemberPill,
   LeaningsScatter,
   PORTFOLIO_ICONS,
   PortfolioHelmGrid,
@@ -133,22 +134,27 @@ export function PeopleChart({
             : 'Click anyone to see their bio and survey portfolio breakdown.';
           return (
           <section aria-labelledby="portfolio-helm-heading">
-            <div className="mb-8 flex flex-col gap-2">
-              <span className="inline-flex items-center gap-2 text-sb-accent-hot">
-                <SectionIcon aria-hidden className="size-4" />
-                <span className="text-xs font-semibold uppercase tracking-[0.22em]">
-                  {eyebrowText}
+            <div className="mb-8 flex flex-col gap-4 min-[880px]:flex-row min-[880px]:items-center min-[880px]:justify-between min-[880px]:gap-6">
+              <div className="flex flex-col gap-2 min-[880px]:flex-1">
+                <span className="inline-flex items-center gap-2 text-sb-accent-hot">
+                  <SectionIcon aria-hidden className="size-4" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+                    {eyebrowText}
+                  </span>
                 </span>
-              </span>
-              <h2
-                id="portfolio-helm-heading"
-                className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
-              >
-                {sectionTitle}
-              </h2>
-              <p className="text-sm leading-[1.6] text-sb-text-muted min-[880px]:text-base">
-                {sectionDescription}
-              </p>
+                <h2
+                  id="portfolio-helm-heading"
+                  className="font-display text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.15] tracking-[-0.03em] text-sb-navy"
+                >
+                  {sectionTitle}
+                </h2>
+                <p className="text-sm leading-[1.6] text-sb-text-muted min-[880px]:text-base">
+                  {sectionDescription}
+                </p>
+              </div>
+              {!rightSelectedMember && (
+                <FindMemberPill reduce={reduce} className="min-[880px]:shrink-0" />
+              )}
             </div>
             <AnimatePresence initial={false} mode="wait">
               {rightSelectedMember ? (

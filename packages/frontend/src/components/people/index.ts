@@ -14,6 +14,8 @@ export { PortfolioHelmCard } from './PortfolioHelmCard';
 export type { PortfolioHelmCardProps } from './PortfolioHelmCard';
 export { PortfolioHelmGrid } from './PortfolioHelmGrid';
 export type { PortfolioHelmGridProps } from './PortfolioHelmGrid';
+export { FindMemberPill } from './FindMemberPill';
+export type { FindMemberPillProps } from './FindMemberPill';
 export {
   expertiseToOpacity,
   polarToCartesian,
