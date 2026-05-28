@@ -11,7 +11,10 @@
 // Portfolios -> Open response.
 //
 //   - Identity: id, name, role, background, isLeadership (free text; id
-//     must be unique).
+//     must be unique). When isLeadership is true the People page renders
+//     a bio card, so also fill bioShort, bioLong, location, focusAreas,
+//     joined, and photoUrl. For non-leadership respondents use empty
+//     strings / empty array.
 //   - expertiseAreas: portfolio ids the respondent ticked under "Which
 //     policy portfolios do you feel strongest in?" — optional, empty array
 //     if they ticked none.
@@ -46,9 +49,17 @@ import type { HardcodedSubmission } from './mock-members-hardcoded.js';
 export const ANON_001: HardcodedSubmission = {
   id: 'anon-001',
   name: 'Anon 001',
-  role: 'Survey respondent',
+  role: 'Portfolio lead (technology & cities)',
   background: 'Anonymous',
-  isLeadership: false,
+  isLeadership: true,
+  bioShort:
+    'Anon 001 works across technology policy and urban infrastructure, with a focus on platform regulation, AI governance, and high-density housing reform. Long-horizon, evidence-first.',
+  bioLong:
+    "Anon 001 has spent over a decade at the intersection of digital infrastructure and city-shaping policy, including time inside major platform companies and on advisory work for state planning bodies. Their interests sit where technology regulation meets the built environment: data centre siting, algorithmic transparency, density reform, and the public investment case for high-speed rail and mass transit. They lead SBA's technology and cities portfolio with a bias toward decisions whose payoff arrives in five to ten years, not the next news cycle.",
+  location: 'Sydney NSW',
+  focusAreas: ['Platform regulation', 'AI governance', 'Housing density', 'Public transport'],
+  joined: '2026',
+  photoUrl: 'https://randomuser.me/api/portraits/lego/2.jpg',
   // Portfolios this person feels strongest in (multi-select on the About-You
   // step). Pick any subset of the 15 portfolio ids below:
   //   'economy-tax'           — C1  Economy, tax & public finance

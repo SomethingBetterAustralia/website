@@ -19,6 +19,14 @@ export interface HardcodedSubmission {
   readonly role: string;
   readonly background: string;
   readonly isLeadership: boolean;
+  // Bio fields shown on the leadership card / profile view. Use empty
+  // string / empty array when the respondent has no value.
+  readonly bioShort: string;
+  readonly bioLong: string;
+  readonly location: string;
+  readonly focusAreas: readonly string[];
+  readonly joined: string;
+  readonly photoUrl: string;
   // Portfolios the respondent self-declared they feel strongest in (the
   // "Which policy portfolios do you feel strongest in?" multi-select on the
   // About-You step). Optional in the form; pass an empty array if none.
@@ -64,12 +72,12 @@ function toMemberProfile(submission: HardcodedSubmission): MemberProfile {
     economicAxis,
     socialAxis,
     portfolioScores,
-    bioShort: '',
-    bioLong: '',
-    location: '',
-    focusAreas: [],
-    joined: '',
-    photoUrl: '',
+    bioShort: submission.bioShort,
+    bioLong: submission.bioLong,
+    location: submission.location,
+    focusAreas: submission.focusAreas,
+    joined: submission.joined,
+    photoUrl: submission.photoUrl,
     _isMock: true,
   };
 }
