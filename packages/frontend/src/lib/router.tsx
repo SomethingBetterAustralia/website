@@ -1,3 +1,6 @@
+// NOTE: The 'People', 'Progress', and 'Recognition' ideas are currently
+// abandoned and not being progressed. Their pages and routes are retained, but
+// they are intentionally omitted from NAV_ITEMS so they no longer appear as tabs.
 import * as React from 'react';
 
 export type Route =
@@ -33,13 +36,10 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: readonly NavItem[] = [
-  { path: '/people', label: 'People' },
   { path: '/policies', label: 'Policies' },
-  { path: '/progress', label: 'Progress' },
   { path: '/financials', label: 'Financials' },
   { path: '/karen', label: 'Karen' },
   { path: '/bacon-board', label: 'Bacon Board' },
-  { path: '/recognition', label: 'Recognition' },
   { path: '/open', label: 'Open' },
 ];
 
