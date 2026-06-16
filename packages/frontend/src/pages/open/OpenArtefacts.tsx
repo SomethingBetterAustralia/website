@@ -2,7 +2,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   BookOpen,
-  BookOpenCheck,
   Bot,
   Code2,
   Eye,
@@ -62,14 +61,6 @@ const ARTEFACTS: readonly ArtefactRow[] = [
     body: 'Every transaction in, every transaction out — a versioned public ledger updated weekly. Beyond what the AEC requires.',
     route: '/financials',
     linkLabel: 'See the Financials page',
-  },
-  {
-    kind: 'internal',
-    icon: BookOpenCheck,
-    label: 'The leanings methodology.',
-    body: 'Survey design, scoring approach, visualisation primitives — all open.',
-    route: '/people',
-    linkLabel: 'See the People page',
   },
   {
     kind: 'internal',

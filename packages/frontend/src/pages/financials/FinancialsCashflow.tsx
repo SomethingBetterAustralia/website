@@ -1,5 +1,5 @@
 import { LineChart as LineChartIcon } from 'lucide-react';
-import { LineChart } from '@/components/progress';
+import { LineChart } from '@/components/financials';
 import {
   MOCK_BALANCE_TIMELINE,
   SectionHeader,

@@ -2,7 +2,6 @@ import cors from 'cors';
 import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-import { peopleRouter } from './routes/people.js';
 import { signupRouter } from './routes/signup.js';
 import { surveyRouter } from './routes/survey.js';
 
@@ -31,6 +30,5 @@ app.get('/api/liveness', (_req, res) => {
 
 app.use('/api/signup', signupRouter);
 app.use('/api/survey', surveyRouter);
-app.use('/api/people', peopleRouter);
 
 app.use(viteProxy);

@@ -1,7 +1,10 @@
 import { motion } from 'motion/react';
 import { type LucideIcon } from 'lucide-react';
-import { type LedgerEntry } from '@/components/financials';
-import { type LineChartDatum, type StateBreakdownDatum } from '@/components/progress';
+import {
+  type LedgerEntry,
+  type LineChartDatum,
+  type StateBreakdownDatum,
+} from '@/components/financials';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 
 export type ReduceMotion = boolean | null;

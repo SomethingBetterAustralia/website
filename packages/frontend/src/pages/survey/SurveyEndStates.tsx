@@ -55,15 +55,14 @@ export function SurveySubmittedCard({ reduce }: { reduce: boolean }) {
         variants={revealUp}
         className="max-w-[52ch] text-[1.05rem] leading-[1.6] text-sb-text"
       >
-        Your response has been recorded. As more of the team submit, the chart on the People
-        page will fill in. You can view it now.
+        Your response has been recorded. Thank you for taking the time to contribute.
       </motion.p>
       <motion.div variants={revealUp} className="mt-2">
         <Button
           asChild
           className="rounded-full bg-sb-accent text-sb-white shadow-[0_4px_12px_rgba(212,166,73,0.35)] hover:bg-sb-accent-hot focus-visible:ring-sb-accent"
         >
-          <Link to="/people">Back to the People page</Link>
+          <Link to="/">Back to home</Link>
         </Button>
       </motion.div>
     </motion.div>

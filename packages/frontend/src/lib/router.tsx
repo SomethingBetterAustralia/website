@@ -1,31 +1,22 @@
-// NOTE: The 'People', 'Progress', and 'Recognition' ideas are currently
-// abandoned and not being progressed. Their pages and routes are retained, but
-// they are intentionally omitted from NAV_ITEMS so they no longer appear as tabs.
 import * as React from 'react';
 
 export type Route =
   | '/'
-  | '/people'
   | '/policies'
-  | '/progress'
   | '/financials'
   | '/karen'
   | '/bacon-board'
   | '/open'
-  | '/recognition'
   | '/survey'
   | '/donate';
 
 export const ROUTES: readonly Route[] = [
   '/',
-  '/people',
   '/policies',
-  '/progress',
   '/financials',
   '/karen',
   '/bacon-board',
   '/open',
-  '/recognition',
   '/survey',
   '/donate',
 ];

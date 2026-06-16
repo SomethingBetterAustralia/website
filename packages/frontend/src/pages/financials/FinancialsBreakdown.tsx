@@ -1,5 +1,5 @@
 import { PieChart } from 'lucide-react';
-import { StateBreakdown, type StateBreakdownDatum } from '@/components/progress';
+import { StateBreakdown, type StateBreakdownDatum } from '@/components/financials';
 import {
   SectionHeader,
   formatCents,

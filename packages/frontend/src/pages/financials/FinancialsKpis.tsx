@@ -1,6 +1,6 @@
 import { Banknote, Gauge, HeartHandshake, TrendingUp, Wallet } from 'lucide-react';
 import { motion } from 'motion/react';
-import { StatCard } from '@/components/progress';
+import { StatCard } from '@/components/financials';
 import { revealUp, staggerContainer, viewportOnce } from '@/lib/motion';
 import {
   LAST_SYNCED,
